@@ -1,0 +1,131 @@
+﻿mse version: 0.3.8
+short name: LackeyCCG Cardfight Universe
+full name: LackeyCCG Cardfight Universe Plugin Exporter
+position hint: 001
+icon: icon.jpg
+version: 2020-08-13.01
+installer group: Vanguard/Export/LackeyCCG
+
+depends on:
+	package: vanguard.mse-game
+	version: 2020-08-10.01
+
+game: vanguard
+file type: *.txt|*.txt|*.*|*.*
+create directory: true
+
+# By Innuendo and Pichoro
+# Based on code by Idle Muse, Seeonee
+
+option field:
+	type: choice
+	name: Remember!
+	choice: You will need to copy the data created in the .txt to your .sets file for YVD!
+option field:
+	type: choice
+	name: Notice!
+	choice: Remember to put the images folder in YVD's image folder!
+option field:
+	type: choice
+	name: Check!
+	choice: Did you type in a set code on the set tab?  You need to!
+script:
+	# Remove the rarity calculatioon
+	set_filter := replace@(match: "VR", replace:"")+
+		replace@(match: "OR", replace:"")+
+		replace@(match: "RRR", replace:"")+
+		replace@(match: "RR", replace:"")+
+		replace@(match: "ЯЯЯ", replace:"")+
+		replace@(match: "GR", replace:"")+
+		replace@(match: "PR", replace:"")+
+		replace@(match: "R", replace:"")+
+		replace@(match: "C", replace:"")
+	#Check Unit Type
+	is_gift := { card.gift != "None" }
+	is_sentinel := { contains(card.text, "N/T:Sentinel") }
+	gunit_filter := {if is_gunit() then "G-Unit"}
+	gift_filter := { if is_gift() != "None" then card.gift }
+	trigger_filter := { if is_trigger() then card.Trigger }
+	sentinel_filter := { if is_sentinel() then "Sentinel" }
+	type_filter := {
+		if is_gift() then card.gift
+		else if is_trigger() then card.Trigger
+		else "Normal Unit"
+	}
+	is_standard := {
+		if set.stylesheet.short_name != "Vanguard" then "Standard"
+		else "Premium"
+	}
+	image_name_filter := replace@(match: "/", replace:"")+
+		replace@(match:"\\\\", replace:"")+
+		replace@(match:"\\(", replace:"")+
+		replace@(match:"\\)", replace:"")+
+		replace@(match:"<sym>", replace:"")+
+		replace@(match:"</sym>", replace:"")
+	skills_filter := replace@(match:"\n", replace:"\t")+
+		replace@(match:"<nospellcheck>", replace:"")+
+		replace@(match:"</nospellcheck>", replace:"")+
+		replace@(match:"<kw-[0-9]*>", replace:"")+
+		replace@(match:"</kw-[0-9]*>", replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)\\[(?=(.(?!<sym></sym>))*?(</sym>))", replace:"COST \\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)F1(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Generation Break 1\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)F2(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Generation Break 2\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)F3(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Generation Break 3\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)FX(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Stride]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)FG(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[G Guardian]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)FH(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Heal]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)FCT(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Critical]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)FDR(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Draw]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)FST(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Stand]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)FFT(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Front]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)FC(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Critical]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)LB4(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Limit Break 4\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)LB5(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Limit Break 5\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)L/G(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Legion\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)L/20kG(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Legion20000\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)L/21kG(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Legion21000\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)L/22kG(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Legion22000\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)C(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Counter Blast \\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)O(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Soul Blast \\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)H(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Soul Charge \\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)J(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Counter Charge \\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)S(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Stand]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)E(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Rest]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)P(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Power]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)LD(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[Shield]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)LOPT(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[1/Turn]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)G(?=(.(?!<sym></sym>))*?(</sym>))", replace:"(GC)\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)R(?=(.(?!<sym></sym>))*?(</sym>))", replace:"(RC)\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)V(?=(.(?!<sym></sym>))*?(</sym>))", replace:"(VC)\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)A/T(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[ACT]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)N/A(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[AUTO]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)N/T(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[CONT]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)A/N(?=(.(?!<sym></sym>))*?(</sym>))", replace:"[IMM]\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)AJKQ(?=(.(?!<sym></sym>))*?(</sym>))", replace:"Royal Flush\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)s([0-9]+)(?=(.(?!<sym></sym>))*?(</sym>))", replace: "(\\3)\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)c([0-9]+)(?=(.(?!<sym></sym>))*?(</sym>))", replace: "(\\3)\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)([0-9]+)(?=(.(?!<sym></sym>))*?(</sym>))", replace: "(\\3)\\1")+replace@(match:"<sym></sym>",replace:"")+
+		replace@(match:"(<sym>(.(?!</sym>|<sym>))*)(.</sym>)",replace:"")+
+		replace@(match:"【",replace:"(")+
+		replace@(match:"】",replace:")")+
+		replace@(match:"\\(\\(",replace:"(")+
+		replace@(match:"\\)\\)",replace:")")+
+		replace@(match:"/\\(",replace:"/")+
+		replace@(match:"C\\)/",replace:"C/")
+	
+	write_card := {"" + card.name+"\t"
+		+card.set_number+"\t"
+		+image_name_filter(card.set_number)+"\t"
+		+card.clan+"\t"
+		+"Grade "+card.grade+" / "+card.skill+"\t"
+		+type_filter()+"\t"
+		+is_standard()+"\t"
+		+"\t"
+		+skills_filter(card.text)
+		+"\n"
+	}
+	
+	write_cards := to_text(for each card in sort_list(cards, order_by: {card.set_number}) do write_card())
+	write_images := for each card in sort_list(cards, order_by: {card.set_number}) do write_image_file(card.image, file: "{to_lower(card.name)}.jpg")
+	to_string(write_cards)
+

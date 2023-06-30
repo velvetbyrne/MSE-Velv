@@ -1,0 +1,317 @@
+﻿mse version: 2.0.0
+game: LoR
+short name: Spell Splash
+installer group: Legends of Runeterra/normal style
+icon: card-sample.png
+position hint: 12
+
+version: 2022-02-14
+depends on:
+	package: LoR.mse-game
+	version: 2022-02-14
+depends on:
+	package: lor-symbol.mse-symbol-font
+	version: 2022-02-14
+
+card width: 1920
+card height: 1080
+card dpi: 150
+
+############################################################## Extra scripts
+init script:
+	text_lines := { min(10, max(1, (card_style.ability.content_height + 13) div 27)) }
+
+############################################################## Extra style options
+styling field:
+	type: choice
+	name: number of regions
+	description: Set the number of regions of the card. Only the first will be displayed in the cardlist.
+	choice: 0
+	choice: 1
+	choice: 2
+	choice: 3
+	initial: 1
+styling field:
+	type: boolean
+	name: show art only
+	description: Toggles the visibility of the name, card type and flavour text box.
+	initial: false
+styling field:
+	type: text
+	name: set title font size
+	description: Sets the font size of the splash's name. Leave blank to default to 38.
+styling field:
+	type: text
+	name: set text font size
+	description: Sets the font size of the splash's flavour text. Leave blank to default to 15.5.
+############################################################## Card fields
+card style:
+	background:
+		left:	0
+		top:	0
+		width:	1920
+		height:	1080
+		z index: 1
+		render style: image
+		choice images:
+			normal: 
+				script:
+					t := ""
+					if card.tail != "Tail" then t := "notail"
+					"/LoR.mse-game/frame/splash/spellartframe.png"
+	darkness:
+		left:	0
+		top:	0
+		width:	1920
+		height:	1080
+		z index: 1
+		render style: image
+		visible:
+			script: not styling.show_art_only
+		choice images:
+			normal: /LoR.mse-game/frame/splash/theencrouchingdarkness.png
+	############################# Image
+	image:
+		left:	420
+		top:	0
+		width:	1080
+		height:	1080
+		z index: 0
+		default: /LoR.mse-game/frame/splash/spellbackdrop.png
+		mask: /LoR.mse-game/frame/splash/spellmask.png
+	############################# Name line
+	name:
+		left: 250
+		top: { if styling.show_art_only then -200 else 53 }
+		width: 1420
+		height: 70
+		alignment: center middle
+		padding left:   4
+		padding top:    2
+		padding right:  4
+		padding bottom: 2
+		line height soft: 0.75
+		z index: 2
+		visible:
+			script: not styling.show_art_only
+		font:
+			name: { if set.Title_Font == "" then "BeaufortforLOL-Bold" else set.Title_Font }
+			size: { if styling.set_title_font_size == "" then 38 else to_number(styling.set_title_font_size) }
+			color: { set.Title_Color }
+	############################# Card type
+	region:
+		left:
+			script:
+				if (styling.number_of_regions >= 1) then 
+					960 - (styling.number_of_regions)*20
+				else -500
+		top:	{ if styling.show_art_only then -200 else 110 }
+		width:	40
+		height:	40
+		z index: 3
+		render style: image
+		visible:
+			script: not styling.show_art_only
+		choice images:
+			Demacia: /LoR.mse-game/regions/new/demacia.png
+			Shadow Isles: /LoR.mse-game/regions/new/shadowisles.png
+			Noxus: /LoR.mse-game/regions/new/noxus.png
+			Ionia: /LoR.mse-game/regions/new/ionia.png
+			Freljord: /LoR.mse-game/regions/new/freljord.png
+			Piltover & Zaun: /LoR.mse-game/regions/new/piltoverzaun.png
+			Bilgewater: /LoR.mse-game/regions/new/bilgewater.png
+			Targon: /LoR.mse-game/regions/new/targon.png
+			Bandle City: /LoR.mse-game/regions/new/bandlecity.png
+			Ixtal: /LoR.mse-game/regions/new/ixtal.png
+			Shurima: /LoR.mse-game/regions/new/shurima.png
+			The Void: /LoR.mse-game/regions/new/void.png
+			Kills: /LoR.mse-game/regions/kda/kdak.png
+			Deaths: /LoR.mse-game/regions/kda/kdad.png
+			Assists: /LoR.mse-game/regions/kda/kdaa.png
+			Runeterra: /LoR.mse-game/regions/new/runeterra.png
+			Custom Region 1: {if set.Custom_Region_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_1}
+			Custom Region 2: {if set.Custom_Region_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_2}
+			Custom Region 3: {if set.Custom_Region_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_3}
+			Custom Region 4: {if set.Custom_Region_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_4}
+			Custom Region 5: {if set.Custom_Region_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_5}
+	region2:
+		left:
+			script:
+				if (styling.number_of_regions >= 2) then 
+					1000 - (styling.number_of_regions)*20
+				else -500
+		top:	{ if styling.show_art_only then -200 else 110 }
+		width:	40
+		height:	40
+		z index: 3
+		render style: image
+		visible:
+			script: not styling.show_art_only
+		choice images:
+			Demacia: /LoR.mse-game/regions/new/demacia.png
+			Shadow Isles: /LoR.mse-game/regions/new/shadowisles.png
+			Noxus: /LoR.mse-game/regions/new/noxus.png
+			Ionia: /LoR.mse-game/regions/new/ionia.png
+			Freljord: /LoR.mse-game/regions/new/freljord.png
+			Piltover & Zaun: /LoR.mse-game/regions/new/piltoverzaun.png
+			Bilgewater: /LoR.mse-game/regions/new/bilgewater.png
+			Targon: /LoR.mse-game/regions/new/targon.png
+			Bandle City: /LoR.mse-game/regions/new/bandlecity.png
+			Ixtal: /LoR.mse-game/regions/new/ixtal.png
+			Shurima: /LoR.mse-game/regions/new/shurima.png
+			The Void: /LoR.mse-game/regions/new/void.png
+			Kills: /LoR.mse-game/regions/kda/kdak.png
+			Deaths: /LoR.mse-game/regions/kda/kdad.png
+			Assists: /LoR.mse-game/regions/kda/kdaa.png
+			Runeterra: /LoR.mse-game/regions/new/runeterra.png
+			Custom Region 1: {if set.Custom_Region_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_1}
+			Custom Region 2: {if set.Custom_Region_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_2}
+			Custom Region 3: {if set.Custom_Region_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_3}
+			Custom Region 4: {if set.Custom_Region_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_4}
+			Custom Region 5: {if set.Custom_Region_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_5}
+	region3:
+		left:
+			script:
+				if (styling.number_of_regions >= 3) then 
+					1040 - (styling.number_of_regions)*20
+				else -500
+		top:	{ if styling.show_art_only then -200 else 110 }
+		width:	40
+		height:	40
+		z index: 3
+		render style: image
+		visible:
+			script: not styling.show_art_only
+		choice images:
+			Demacia: /LoR.mse-game/regions/new/demacia.png
+			Shadow Isles: /LoR.mse-game/regions/new/shadowisles.png
+			Noxus: /LoR.mse-game/regions/new/noxus.png
+			Ionia: /LoR.mse-game/regions/new/ionia.png
+			Freljord: /LoR.mse-game/regions/new/freljord.png
+			Piltover & Zaun: /LoR.mse-game/regions/new/piltoverzaun.png
+			Bilgewater: /LoR.mse-game/regions/new/bilgewater.png
+			Targon: /LoR.mse-game/regions/new/targon.png
+			Bandle City: /LoR.mse-game/regions/new/bandlecity.png
+			Ixtal: /LoR.mse-game/regions/new/ixtal.png
+			Shurima: /LoR.mse-game/regions/new/shurima.png
+			The Void: /LoR.mse-game/regions/new/void.png
+			Kills: /LoR.mse-game/regions/kda/kdak.png
+			Deaths: /LoR.mse-game/regions/kda/kdad.png
+			Assists: /LoR.mse-game/regions/kda/kdaa.png
+			Runeterra: /LoR.mse-game/regions/new/runeterra.png
+			Custom Region 1: {if set.Custom_Region_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_1}
+			Custom Region 2: {if set.Custom_Region_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_2}
+			Custom Region 3: {if set.Custom_Region_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_3}
+			Custom Region 4: {if set.Custom_Region_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_4}
+			Custom Region 5: {if set.Custom_Region_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_5}
+	typetype:
+		left: 800
+		top : { if styling.show_art_only then -200 else 27 }
+		width: 320
+		height: 36
+		alignment: center middle shrink-overflow
+		padding left:   4
+		padding top:    2
+		padding right:  4
+		padding bottom: 2
+		z index: 3
+		visible:
+			script: not styling.show_art_only
+		font:
+			name: { if set.Text_Font == "" then "Beaufort for LOL" else set.Text_Font }
+			size: 20
+			color: rgb(208, 143, 71)
+	############################# Text box
+	ability:
+		left: 695
+		top: { if styling.show_art_only then 4000 else 1022 - (text_lines() * 26) }
+		width: 530
+		height: { text_lines() * 26 }
+		font:
+			name: { if set.Text_Font == "" then "Beaufort for LOL" else set.Text_Font }
+			size: { if styling.set_text_font_size == "" then 15.5 else to_number(styling.set_text_font_size) }
+			color: rgb(255, 255, 255)
+		visible:
+			script: not styling.show_art_only
+		alignment: center top shrink-overflow
+		z index: 3
+		padding left:   4
+		padding top:    2
+		padding right:  4
+		padding bottom: 2
+		line height hard: 1.2
+		line height line: 1.5
+############################################################## Extra card fields
+extra card field:
+	type: choice
+	name: goldbits
+	choice: normal
+	show statistics: false
+	editable: false
+extra card style:
+	goldbits:
+		left:	645
+		top:	129
+		width:	631
+		height:	6
+		z index: 2
+		render style: image
+		visible:
+			script: not styling.show_art_only
+		choice images:
+			normal: { "/LoR.mse-game/frame/splash/goldbits" + styling.number_of_regions + ".png" }
+extra card field:
+	type: choice
+	name: quotation
+	choice: normal
+	show statistics: false
+	editable: false
+extra card style:
+	quotation:
+		left:	640
+		top: { if styling.show_art_only then 4000 else 1012 - (text_lines() * 26) }
+		width:	640
+		height:	55
+		z index: 4
+		render style: image
+		visible:
+			script: not styling.show_art_only
+		choice images:
+			normal: /LoR.mse-game/frame/splash/quotation.png
+extra card field:
+	type: choice
+	name: flavourbox
+	choice: normal
+	show statistics: false
+	editable: false
+extra card style:
+	flavourbox:
+		left:	624
+		bottom:	{ if styling.show_art_only then -200 else 1078 }
+		width:	672
+		height:	342
+		z index: 2
+		render style: image
+		visible:
+			script: not styling.show_art_only
+		choice images:
+			normal: { "/LoR.mse-game/frame/splash/frame" + to_string(text_lines()) + ".png" }
+extra card field:
+	type: text
+	name: artist
+	default: "ILLUSTRATION BY "
+	show statistics: false
+extra card style:
+	artist:
+		left:	671
+		top:	{ if styling.show_art_only then -200 else 1028 }
+		width:	578
+		height:	27
+		z index: 2
+		alignment: center middle
+		visible:
+			script: not styling.show_art_only
+		font:
+			name: { if set.Text_Font == "" then "Beaufort for LOL" else set.Text_Font }
+			size: { if styling.set_text_font_size == "" then 14 else to_number(styling.set_text_font_size) }
+			color: rgb(159, 151, 138)

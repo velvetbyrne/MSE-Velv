@@ -1,0 +1,224 @@
+﻿mse version: 2.0.0
+short name: LoR Symbols
+position hint: 201
+icon: barrier.png
+installer group: Legends of Runeterra/Symbols/normal style
+image font size: 26
+horizontal space: 2
+
+version: 2022-09-05
+depends on:
+	package: LoR.mse-game
+	version: 2022-09-05
+
+symbol:
+	code: A
+	image: /LoR.mse-game/keywords/inline/lastbreath.png
+symbol:
+	code: B
+	image: /LoR.mse-game/keywords/inline/barrier.png
+symbol:
+	code: C
+	image: /LoR.mse-game/keywords/inline/challenger.png
+symbol:
+	code: D
+	image: /LoR.mse-game/keywords/inline/doubleattack.png
+symbol:
+	code: E
+	image: /LoR.mse-game/keywords/inline/elusive.png
+symbol:
+	code: F
+	image: /LoR.mse-game/keywords/inline/fearsome.png
+symbol:
+	code: G
+	image: /LoR.mse-game/keywords/inline/fleeting.png
+symbol:
+	code: H
+	image: /LoR.mse-game/keywords/inline/spellshield.png
+symbol:
+	code: I
+	image: /LoR.mse-game/keywords/inline/frostbite.png
+symbol:
+	code: J
+	image: /LoR.mse-game/keywords/inline/lurk.png
+symbol:
+	code: K
+	image: /LoR.mse-game/keywords/inline/capture.png
+symbol:
+	code: L
+	image: /LoR.mse-game/keywords/inline/lifesteal.png
+symbol:
+	code: M
+	image: /LoR.mse-game/keywords/inline/augment.png
+symbol:
+	code: N
+	image: /LoR.mse-game/keywords/inline/deep.png
+symbol:
+	code: O
+	image: /LoR.mse-game/keywords/inline/overwhelm.png
+symbol:
+	code: P
+	image: /LoR.mse-game/keywords/inline/ephemeral.png
+symbol:
+	code: Q
+	image: /LoR.mse-game/keywords/inline/quickattack.png
+symbol:
+	code: R
+	image: /LoR.mse-game/keywords/inline/regeneration.png
+symbol:
+	code: S
+	image: /LoR.mse-game/keywords/inline/stun.png
+symbol:
+	code: T
+	image: /LoR.mse-game/keywords/inline/tough.png
+symbol:
+	code: U
+	image: /LoR.mse-game/keywords/inline/attune.png
+symbol:
+	code: V
+	image: /LoR.mse-game/keywords/inline/vulnerable.png
+symbol:
+	code: W
+	image: /LoR.mse-game/keywords/inline/scout.png
+symbol:
+	code: X
+	image: /LoR.mse-game/keywords/inline/invoke.png
+symbol:
+	code: Y
+	image: /LoR.mse-game/keywords/inline/fury.png
+symbol:
+	code: Z
+	image: /LoR.mse-game/keywords/inline/impact.png
+symbol:
+	code: ^
+	image: /LoR.mse-game/keywords/inline/fated.png
+symbol:
+	code: +
+	image: /LoR.mse-game/keywords/inline/attach.png
+symbol:
+	code: =
+	image: /LoR.mse-game/keywords/inline/formidable.png
+symbol:
+	code: -
+	image: /LoR.mse-game/keywords/inline/hallowed.png
+symbol:
+	code: *
+	image: /LoR.mse-game/keywords/inline/evolve.png
+symbol:
+	code: /
+	image: /LoR.mse-game/keywords/inline/cantattack.png
+symbol:
+	code: \
+	image: /LoR.mse-game/keywords/inline/cantblock.png
+symbol:
+	code: !
+	image: /LoR.mse-game/keywords/inline/burst.png
+symbol:
+	code: ,
+	image: /LoR.mse-game/keywords/inline/focus.png
+symbol:
+	code: ?
+	image: /LoR.mse-game/keywords/inline/fast.png
+symbol:
+	code: .
+	image: /LoR.mse-game/keywords/inline/slow.png
+symbol:
+	code: @
+	image: /LoR.mse-game/keywords/inline/skill.png
+symbol:
+	code: 0
+	image: /LoR.mse-game/custom/customsymbol0.png
+symbol:
+	code: 1
+	image: /LoR.mse-game/custom/customsymbol1.png
+symbol:
+	code: 2
+	image: /LoR.mse-game/custom/customsymbol2.png
+symbol:
+	code: 3
+	image: /LoR.mse-game/custom/customsymbol3.png
+symbol:
+	code: 4
+	image: /LoR.mse-game/custom/customsymbol4.png
+symbol:
+	code: 5
+	image: /LoR.mse-game/custom/customsymbol5.png
+symbol:
+	code: 6
+	image: /LoR.mse-game/custom/customsymbol6.png
+symbol:
+	code: 7
+	image: /LoR.mse-game/custom/customsymbol7.png
+symbol:
+	code: 8
+	image: /LoR.mse-game/custom/customsymbol8.png
+symbol:
+	code: 9
+	image: /LoR.mse-game/custom/customsymbol9.png
+#########################################################################################################
+# Insert-symbol menu
+insert symbol menu:
+	item:
+		name: Standard
+		item: B
+		item: K
+		item: C
+		item: D
+		item: E
+		item: P
+		item: F
+		item: G
+		item: I
+		item: A
+		item: L
+		item: O
+		item: Q
+		item: R
+		item: S
+		item: T
+		item:
+			type: line
+		item: /
+		item: \
+		item:
+			type: line
+		item: U
+		item: N
+		item: W
+		item: V
+		item:
+			type: line
+		item: H
+		item: X
+		item: Y
+		item: M
+		item:
+			type: line
+		item: J
+		item: Z
+		item: ^
+		item: +
+		item: =
+		item:
+			type: line
+		item: -
+		item: *
+	item:
+		name: Spell
+		item: !
+		item: ,
+		item: ?
+		item: .
+		item: @
+	item:
+		name: Custom
+		item: 1
+		item: 2
+		item: 3
+		item: 4
+		item: 5
+		item: 6
+		item: 7
+		item: 8
+		item: 9
+		item: 0

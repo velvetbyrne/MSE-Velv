@@ -1,0 +1,64 @@
+﻿mse version: 0.3.8
+version: 2020-08-09.01
+short name: Rarity
+full name: Rarity Symbols
+position hint: 1
+installer group: Vanguard/Symbol Fonts/V-Rarity
+
+#image font size: 125
+horizontal space: 0
+vertical space: -2
+
+symbol:
+	code: SGR
+	image: SGR.png
+	image font size: 40
+
+symbol:
+	code: SP
+	image: SP.png
+	image font size: 40
+
+symbol:
+	code: GR
+	image: GR.png
+	image font size: 40
+
+symbol:
+	code: VR
+	image: VR.png
+	image font size: 40
+	
+symbol:
+	code: OR
+	image: OR.png
+	image font size: 40
+
+symbol:
+	code: RRR
+	image: RRR.png
+	image font size: 40
+
+symbol:
+	code: RR
+	image: RR.png
+	image font size: 40
+
+symbol:
+	code: R
+	image: R.png
+	image font size: 40
+
+symbol:
+	code: C
+	image: C.png
+	image font size: 40
+
+insert symbol menu:
+	item: SP
+	item: VR
+	item: RRR
+	item: RR
+	item: R
+	item: C
+	item: OR

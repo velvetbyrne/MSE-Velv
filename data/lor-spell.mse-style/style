@@ -1,0 +1,1049 @@
+﻿mse version: 2.0.0
+game: LoR
+short name: Spell
+installer group: Legends of Runeterra/spell style
+icon: card-sample.png
+position hint: 03
+
+version: 2022-09-05
+depends on:
+	package: LoR.mse-game
+	version: 2022-09-05
+depends on:
+	package: lor-symbol.mse-symbol-font
+	version: 2022-09-05
+
+card width: 340
+card height: 512
+card dpi: 150
+# Author: kino
+# Based on: magic-new
+############################################################## Extra scripts
+init script:
+	keyword_chop := {
+		hack := 0
+		if (card.keysymbolreal == "Blank" or speed_frame() == "trap") and not (conjoin() and styling.number_of_keywords == "2") then hack := 26
+		if styling.set_keyword_chop != "" then ( to_number(styling.set_keyword_chop) + hack )
+		## else ( for each k:v in keyword_chops do  if k == card.keywordtext then v )
+		else min( to_int(169 - card_style.keywordtext.content_width + hack), 150)
+	}
+	keyword_height := { 312 - the_great_offset() + to_number(styling.set_keywords_offset) + name_offset() }
+	text_lines := {	max(1, hight div (fs*1.275)) }
+	font_size := { 
+		if fld == "name" then
+			if (styling.set_title_font_size != "" and styling.set_title_font_size != "-") then to_number(styling.set_title_font_size) else 20
+		else if fld == "ability" then 
+			if (styling.set_text_font_size != "" and styling.set_text_font_size != "-") then to_number(styling.set_text_font_size) else 13
+		else 0
+	}
+	name_offset := {
+		x := to_number(styling.set_title_offset)
+		fsr := font_size(fld: "name")
+		x + ((text_lines(hight: card_style.name.content_height, fs:fsr) - 1) * fsr + (fsr - 20)) * 1.275
+	}
+	the_great_offset := {
+		fsr := font_size(fld: "name")
+		if text_lines(hight: card_style.name.content_height, fs:fsr) == 1 then 0 else 2
+	}
+	speed_frame := {
+		v := card.keysymbolreal
+		if styling.no_of_keywords != 1 then (
+			v := card.keysymbol1
+			if substring(v, end:5) != "Spell" then (
+				v := card.keysymbol2
+				if substring(v, end:5) != "Spell" then (
+					v := card.keysymbol3
+					if substring(v, end:5) != "Spell" then (
+						v := card.keysymbol4
+					)
+				)
+			)
+		)
+		if styling.set_spell_speed_frame == "Burst" or (styling.set_spell_speed_frame == "Default" and v == "Spell Burst") then "burst"
+		else if styling.set_spell_speed_frame == "Focus" or (styling.set_spell_speed_frame == "Default" and v == "Spell Focus") then "focus"
+		else if styling.set_spell_speed_frame == "Fast" or (styling.set_spell_speed_frame == "Default" and v == "Spell Fast") then "fast"
+		else if styling.set_spell_speed_frame == "Skill" or (styling.set_spell_speed_frame == "Default" and v == "Spell Skill") then "skill"
+		else if styling.set_spell_speed_frame == "Trap" or (styling.set_spell_speed_frame == "Default" and v == "Spell Trap") then "trap"
+		else if styling.set_spell_speed_frame == "Boon" or (styling.set_spell_speed_frame == "Default" and v == "Spell Boon") then "trap"
+		else if styling.set_spell_speed_frame == "Origin" or (styling.set_spell_speed_frame == "Default" and v == "Spell Origin") then "origin"
+		else if styling.set_spell_speed_frame == "Equipment" or (styling.set_spell_speed_frame == "Default" and v == "Spell Equipment") then "equipment"
+		else "slow"
+	}
+	origin_offset := {
+		if speed_frame() == "origin" then -40
+		else 0
+	}
+	conjoin := {
+		if styling.conjoin_first_two_keyword_boxes == "Always" then true
+		else if styling.conjoin_first_two_keyword_boxes == "Never" then false
+		else ((styling.no_of_keywords > 1) and (card.keysymbol1 == "Standard Can't Attack") and (card.keysymbol2 == "Standard Can't Block"))		
+	}
+
+############################################################## Extra style options
+styling field:
+	type: choice
+	name: no of keywords
+	description: Set the number of keywords to use. Keyword text can only be if used if this is set to 1.
+	choice: 1
+	choice: 2
+	choice: 3
+	choice: 4
+	initial: 1
+styling field:
+	type: choice
+	name: set spell speed frame
+	description: Determines which frame styling is used. By default, checks the first keyword symbol.
+	choice: Default
+	choice: Burst
+	choice: Focus
+	choice: Fast
+	choice: Slow
+	choice: Skill
+	choice: Trap
+	choice: Origin
+	choice: Equipment
+	initial: Default
+styling field:
+	type: choice
+	name: background style
+	description: Sets whether to use a colored background or an image background for the body of the card.
+	initial: Color
+	choice: Color
+	choice: Image
+styling field:
+	type: choice
+	name: number of regions
+	description: Set the number of regions of the card. Only the first will be displayed in the cardlist.
+	choice: 0
+	choice: 1
+	choice: 2
+	choice: 3
+	initial: 1
+styling field:
+	type: text
+	name: set title font size
+	description: Sets the font size of the card's name. Leave blank to default to 20.
+styling field:
+	type: text
+	name: set text font size
+	description: Sets the font size of the card's ability text. Leave blank to default to 13.
+styling field:
+	type: text
+	name: set keyword chop
+	description: Overrides the regular sizing of the keyword box. Automatic resizing is disabled if this field contains a value.
+styling field:
+	type: text
+	name: set title offset
+	description: Adjusts the position of the name, keywords and ability text.
+styling field:
+	type: text
+	name: set keywords offset
+	description: Adjusts the position of the keywords and ability text.
+styling field:
+	type: text
+	name: set ability text offset
+	description: Adjusts the position of the ability text.
+styling field:
+	type: choice
+	name: conjoin first two keyword boxes
+	description: Determines when the first and second keyword boxes are merged into one when two or more are displayed.
+	initial: Only for "Can't Attack / Block"
+	choice: Never
+	choice: Only for "Can't Attack / Block"
+	choice: Always
+styling field:
+	type: boolean
+	name: use image background
+	description: Determines whether to use a block colour background an image input background.
+	initial: no
+############################################################## Card fields
+card style:
+	############################# Background stuff
+	background:
+		left:	0
+		top:	0
+		width:	340
+		height:	512
+		z index: -1
+		render style: image
+		choice images:
+			normal: 
+				script:
+					fr := speed_frame()
+					if (fr == "skill" or fr == "origin") then (fr := "trap")
+					if (fr == "focus") then (fr := "burst")
+					if (fr == "equipment") then (fr := "slow")
+					ame := ""
+					if (fr != "trap") then (ame := to_lower(card.rarity))
+					if (card.typetype != "") then (ame := "token")
+					"/LoR.mse-game/frame/spell/frame" + fr + ame + ".png"
+	truebackground:
+		left: { if styling.use_image_background then 1000 else 0 }
+		top:	0
+		width:	340
+		height:	512
+		z index: -6
+	backgroundimage:
+		left: { if styling.use_image_background then 0 else 1000 }
+		top:	0
+		width:	340
+		height:	512
+		z index: -5
+	regionbox:
+		left:	210
+		top:	20
+		width:	110
+		height:	140
+		z index: 0
+		render style: image
+		visible: { set.use_new_region_placement }
+		choice images:
+			normal: { "/LoR.mse-game/frame/spell/regionbox" + styling.number_of_regions + ".png" }
+	artist arrow:
+		left:	12
+		top:	490
+		width:	16
+		height:	16
+		z index: 0
+		visible: { card.illustrator != "" }
+		mask: /LoR.mse-game/frame/artistarrow.png
+	############################# Image
+	image:
+		left:	57
+		top:	36
+		width:	224
+		height:	221
+		z index: -3
+		default: { "/LoR.mse-game/frame/spell/backdrop.png" }
+		mask:
+			script:
+				fr := speed_frame()
+				if (fr == "skill" or fr == "trap" or fr == "origin") then (fr := "fast")
+				if (fr == "focus") then (fr := "burst")
+				if (fr == "equipment") then (fr := "slow")
+				"/LoR.mse-game/frame/spell/mask" + fr + ".png"
+	image2:
+		left:	10
+		top:	232
+		width:	{ if styling.background_style == "Image" then 317 else 0 }
+		height:	235
+		z index: -4
+		default: { "/LoR.mse-game/frame/spell/backdrop2.png" }
+		mask: /LoR.mse-game/frame/spell/mask2.png
+		visible: { styling.background_style == "Image" }
+	defaultback:
+		left:	10
+		top:	232
+		width:	{ if styling.background_style == "Color" then 317 else 0 }
+		height:	235
+		render style: image
+		choice images:
+			normal: /LoR.mse-game/frame/spell/background.png
+		combine: multiply
+		z index: -3
+		visible: { styling.background_style == "Color" }
+	colorback:
+		left:	10
+		top:	232
+		width:	{ if styling.background_style == "Color" then 317 else 0 }
+		height:	246
+		z index: -4
+		radius: 25
+		visible: { styling.background_style == "Color" }
+		
+	############################# Name line
+	name:
+		left: 25
+		top : { 283 + to_number(styling.set_title_offset) }
+		width: 284
+		height:
+			script:
+				fsr := font_size(fld: "name")
+				(text_lines(hight: card_style.name.content_height, fs:fsr) + 0.4) * fsr * 1.275
+		alignment: center top shrink-overflow
+		padding left:   4
+		padding top:    2
+		padding right:  4
+		padding bottom: 2
+		line height soft: 0.75
+		line height hard: 0.75
+		z index: 6
+		font:
+			name: { if set.Title_Font == "" then "BeaufortforLOL-Bold" else set.Title_Font }
+			size: { font_size(fld: "name") }
+			color: { set.Title_Color }
+			shadow color: rgb(0, 0, 0)
+			shadow blur: 1
+	############################# Card type
+	region:
+		left:
+			script:
+				if (styling.number_of_regions >= 1) then 
+					if (set.use_new_region_placement) then
+						232.5
+					else 169 - (styling.number_of_regions)*25
+				else -250
+		top:
+			script:
+				if (set.use_new_region_placement) then
+					35
+				else 415
+		width: { if set.use_new_region_placement then 40 else 50 }
+		height: { if set.use_new_region_placement then 40 else 50 }
+		z index: 2
+		render style: image
+		mask: 
+			script:
+					if set.use_new_region_placement then ""
+					else if to_lower(card.rarity) == "token" then "/LoR.mse-game/frame/halftreasure.png"
+					else "/LoR.mse-game/frame/half.png"
+		choice images:
+			Demacia: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/demacia.png" else "/LoR.mse-game/regions/old/demacia.png" }
+			Shadow Isles: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/shadowisles.png" else "/LoR.mse-game/regions/old/shadowisles.png" }
+			Noxus: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/noxus.png" else "/LoR.mse-game/regions/old/noxus.png" }
+			Ionia: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/ionia.png" else "/LoR.mse-game/regions/old/ionia.png" }
+			Freljord: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/freljord.png" else "/LoR.mse-game/regions/old/freljord.png" }
+			Piltover & Zaun: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/piltoverzaun.png" else "/LoR.mse-game/regions/old/piltoverzaun.png" }
+			Bilgewater: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/bilgewater.png" else "/LoR.mse-game/regions/old/bilgewater.png" }
+			Targon: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/targon.png" else "/LoR.mse-game/regions/old/targon.png"}
+			Bandle City: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/bandlecity.png" else "/LoR.mse-game/regions/old/bandlecity.png"}
+			Ixtal: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/ixtal.png" else "/LoR.mse-game/regions/old/ixtal.png" }
+			Shurima: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/shurima.png" else "/LoR.mse-game/regions/old/shurima.png" }
+			The Void: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/void.png" else "/LoR.mse-game/regions/old/void.png" }
+			Kills: { "/LoR.mse-game/regions/kda/kdak.png" }
+			Deaths: { "/LoR.mse-game/regions/kda/kdad.png" }
+			Assists: { "/LoR.mse-game/regions/kda/kdaa.png" }
+			Runeterra: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/runeterra.png" else "/LoR.mse-game/regions/old/runeterra.png" }
+			Custom Region 1: {if set.Custom_Region_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_1}
+			Custom Region 2: {if set.Custom_Region_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_2}
+			Custom Region 3: {if set.Custom_Region_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_3}
+			Custom Region 4: {if set.Custom_Region_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_4}
+			Custom Region 5: {if set.Custom_Region_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_5}
+	region2:
+		left:
+			script:
+				if (styling.number_of_regions >= 2) then 
+					if (set.use_new_region_placement) then
+						256
+					else 219 - (styling.number_of_regions)*25
+				else -250
+		top:
+			script:
+				if (set.use_new_region_placement) then
+					60
+				else 415
+		width: { if set.use_new_region_placement then 40 else 50 }
+		height: { if set.use_new_region_placement then 40 else 50 }
+		z index: 2
+		render style: image
+		mask: 
+			script:
+					if set.use_new_region_placement then ""
+					else if to_lower(card.rarity) == "token" then "/LoR.mse-game/frame/halftreasure.png"
+					else "/LoR.mse-game/frame/half.png"
+		choice images:
+			Demacia: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/demacia.png" else "/LoR.mse-game/regions/old/demacia.png" }
+			Shadow Isles: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/shadowisles.png" else "/LoR.mse-game/regions/old/shadowisles.png" }
+			Noxus: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/noxus.png" else "/LoR.mse-game/regions/old/noxus.png" }
+			Ionia: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/ionia.png" else "/LoR.mse-game/regions/old/ionia.png" }
+			Freljord: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/freljord.png" else "/LoR.mse-game/regions/old/freljord.png" }
+			Piltover & Zaun: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/piltoverzaun.png" else "/LoR.mse-game/regions/old/piltoverzaun.png" }
+			Bilgewater: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/bilgewater.png" else "/LoR.mse-game/regions/old/bilgewater.png" }
+			Targon: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/targon.png" else "/LoR.mse-game/regions/old/targon.png"}
+			Bandle City: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/bandlecity.png" else "/LoR.mse-game/regions/old/bandlecity.png"}
+			Ixtal: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/ixtal.png" else "/LoR.mse-game/regions/old/ixtal.png" }
+			Shurima: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/shurima.png" else "/LoR.mse-game/regions/old/shurima.png" }
+			The Void: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/void.png" else "/LoR.mse-game/regions/old/void.png" }
+			Kills: { "/LoR.mse-game/regions/kda/kdak.png" }
+			Deaths: { "/LoR.mse-game/regions/kda/kdad.png" }
+			Assists: { "/LoR.mse-game/regions/kda/kdaa.png" }
+			Runeterra: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/runeterra.png" else "/LoR.mse-game/regions/old/runeterra.png" }
+			Custom Region 1: {if set.Custom_Region_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_1}
+			Custom Region 2: {if set.Custom_Region_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_2}
+			Custom Region 3: {if set.Custom_Region_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_3}
+			Custom Region 4: {if set.Custom_Region_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_4}
+			Custom Region 5: {if set.Custom_Region_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_5}
+	region3:
+		left:
+			script:
+				if (styling.number_of_regions >= 3) then 
+					if (set.use_new_region_placement) then
+						268
+					else 269 - (styling.number_of_regions)*25
+				else -250
+		top:
+			script:
+				if (set.use_new_region_placement) then
+					100
+				else 415
+		width: { if set.use_new_region_placement then 40 else 50 }
+		height: { if set.use_new_region_placement then 40 else 50 }
+		z index: 2
+		render style: image
+		mask: 
+			script:
+					if set.use_new_region_placement then ""
+					else if to_lower(card.rarity) == "token" then "/LoR.mse-game/frame/halftreasure.png"
+					else "/LoR.mse-game/frame/half.png"
+		choice images:
+			Demacia: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/demacia.png" else "/LoR.mse-game/regions/old/demacia.png" }
+			Shadow Isles: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/shadowisles.png" else "/LoR.mse-game/regions/old/shadowisles.png" }
+			Noxus: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/noxus.png" else "/LoR.mse-game/regions/old/noxus.png" }
+			Ionia: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/ionia.png" else "/LoR.mse-game/regions/old/ionia.png" }
+			Freljord: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/freljord.png" else "/LoR.mse-game/regions/old/freljord.png" }
+			Piltover & Zaun: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/piltoverzaun.png" else "/LoR.mse-game/regions/old/piltoverzaun.png" }
+			Bilgewater: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/bilgewater.png" else "/LoR.mse-game/regions/old/bilgewater.png" }
+			Targon: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/targon.png" else "/LoR.mse-game/regions/old/targon.png"}
+			Bandle City: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/bandlecity.png" else "/LoR.mse-game/regions/old/bandlecity.png"}
+			Ixtal: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/ixtal.png" else "/LoR.mse-game/regions/old/ixtal.png" }
+			Shurima: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/shurima.png" else "/LoR.mse-game/regions/old/shurima.png" }
+			The Void: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/void.png" else "/LoR.mse-game/regions/old/void.png" }
+			Kills: { "/LoR.mse-game/regions/kda/kdak.png" }
+			Deaths: { "/LoR.mse-game/regions/kda/kdad.png" }
+			Assists: { "/LoR.mse-game/regions/kda/kdaa.png" }
+			Runeterra: { if set.use_new_region_placement then "/LoR.mse-game/regions/new/runeterra.png" else "/LoR.mse-game/regions/old/runeterra.png" }
+			Custom Region 1: {if set.Custom_Region_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_1}
+			Custom Region 2: {if set.Custom_Region_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_2}
+			Custom Region 3: {if set.Custom_Region_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_3}
+			Custom Region 4: {if set.Custom_Region_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_4}
+			Custom Region 5: {if set.Custom_Region_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Region_5}
+	rarity:
+		left: 149
+		top : 464
+		width:	38
+		height:	38
+		z index: 2
+		render style: hidden
+		visible: true
+		choice images:
+			Champion: /LoR.mse-game/rarities/gemchampiongrey.png
+			Epic: /LoR.mse-game/rarities/gemepic.png
+			Rare: /LoR.mse-game/rarities/gemrare.png
+			Common: /LoR.mse-game/rarities/gemcommon.png
+			Token: /LoR.mse-game/rarities/gemtreasure.png
+			None: { built_in_image("bool_no") }
+	typetype:
+		left: 114
+		top : { if (speed_frame() == "slow" or speed_frame() == "equipment") then 460 else 461 }
+		width: 107
+		height: 25
+		alignment: center middle shrink-overflow
+		padding left:   4
+		padding top:    2
+		padding right:  4
+		padding bottom: 2
+		z index: 3
+		font:
+			name: { if set.Keyword_Font == "" then "Univers LT Std 59 UltraCn" else set.Keyword_Font }
+			size: 13
+			color: { set.Token_Color }
+	############################# Text box
+	ability:
+		left: 25
+		top : { 48 + keyword_height() + to_number(styling.set_ability_text_offset) + origin_offset() }
+		width: 284
+		height: { max(25, card_style.ability.content_height + 5) }
+		font:
+			name: { if set.Text_Font == "" then "Univers 55" else set.Text_Font }
+			size: { font_size(fld: "ability") }
+			color: { set.Ability_Color }
+			shadow color: rgb(0, 0, 0)
+			shadow blur: 1
+		symbol font:
+			name: lor-symbol.mse-symbol-font
+			size: { font_size(fld: "ability") }
+		alignment: center top shrink-overflow
+		z index: 2
+		padding left:   4
+		padding top:    2
+		padding right:  4
+		padding bottom: 2
+		line height hard: 1.2
+		line height line: 1.5
+	############################# Keywords
+	keywordleft:
+		left :
+			script:
+				if (styling.no_of_keywords > 1 and conjoin()) then 
+					if (styling.no_of_keywords == "2") then
+						42 + keyword_chop()/2
+					else 196 - 37*styling.no_of_keywords
+				else 57 + keyword_chop()/2
+		top: { if conjoin() then keyword_height() - 1 else keyword_height() }
+		width:	14
+		height:	52
+		z index: 1
+		render style: image
+		visible: { (styling.no_of_keywords == "1" or conjoin()) and speed_frame() != "origin" }
+		choice images:
+			normal: /LoR.mse-game/frame/keywordleft.png
+	keywordright:
+		left :
+			script:
+				if (styling.no_of_keywords > 1 and conjoin()) then 
+					if (styling.no_of_keywords == "2") then
+						278 - keyword_chop()/2
+					else 270 - 37*styling.no_of_keywords
+				else 263 - keyword_chop()/2
+		top: { if conjoin() then keyword_height() - 1 else keyword_height() }
+		width:	14
+		height:	52
+		z index: 1
+		render style: image
+		visible: { (styling.no_of_keywords == "1" or conjoin()) and speed_frame() != "origin" }
+		choice images:
+			normal: /LoR.mse-game/frame/keywordright.png
+	keywordmiddle:
+		left :
+			script:
+				if (styling.no_of_keywords > 1 and conjoin()) then 
+					if (styling.no_of_keywords == "2") then
+						56 + keyword_chop()/2
+					else 210 - 37*styling.no_of_keywords
+				else 71 + keyword_chop()/2
+		top: { if conjoin() then keyword_height() - 1 else keyword_height() }
+		width :
+			script:
+				if (styling.no_of_keywords > 1 and conjoin()) then 
+					if (styling.no_of_keywords == "2") then
+						222 - keyword_chop()
+					else 60
+				else 192 - keyword_chop()
+		height:	52
+		z index: 1
+		render style: image
+		visible: { (styling.no_of_keywords == "1" or conjoin()) and speed_frame() != "origin" }
+		choice images:
+			normal: /LoR.mse-game/frame/keywordmiddle.png
+	keywordbox1:
+		left:	{ 172 - 37*styling.no_of_keywords }
+		top: { keyword_height() }
+		width:	60
+		height:	50
+		z index: 1
+		render style: image
+		visible: { ((styling.no_of_keywords > 1) and not conjoin()) and speed_frame() != "origin"  }
+		choice images:
+			normal: /LoR.mse-game/frame/keywordmini.png
+	keywordbox2:
+		left:	{ 246 - 37*styling.no_of_keywords }
+		top: { keyword_height() }
+		width:	60
+		height:	50
+		z index: 1
+		render style: image
+		visible: { ((styling.no_of_keywords > 1) and not conjoin()) and speed_frame() != "origin" }
+		choice images:
+			normal: /LoR.mse-game/frame/keywordmini.png
+	keywordbox3:
+		left:	{ if conjoin() then 298 - 37*styling.no_of_keywords else 320 - 37*styling.no_of_keywords }
+		top: { keyword_height() }
+		width:	60
+		height:	50
+		z index: 1
+		render style: image
+		visible: { styling.no_of_keywords > 2 and speed_frame() != "origin" }
+		choice images:
+			normal: /LoR.mse-game/frame/keywordmini.png
+	keywordbox4:
+		left:	{ if conjoin() then 372 - 37*styling.no_of_keywords else 394 - 37*styling.no_of_keywords }
+		top: { keyword_height() }
+		width:	60
+		height:	50
+		z index: 1
+		render style: image
+		visible: { styling.no_of_keywords > 3 and speed_frame() != "origin" }
+		choice images:
+			normal: /LoR.mse-game/frame/keywordmini.png
+	keywordtext:
+		left:
+			script:
+				x := 96 + keyword_chop()/2
+				if conjoin() and styling.no_of_keywords == "2" then
+					x + 15
+				else if (card.keysymbolreal == "Blank" or speed_frame() == "trap") then x - 38 else x
+		top :
+			script:
+				if (styling.no_of_keywords == "2" and conjoin()) then keyword_height() + 8.5
+				else if (styling.no_of_keywords == "1") then keyword_height() + 10
+				else -50
+		width:
+			script:
+				x := 175 - keyword_chop()
+				if (card.keysymbolreal == "Blank" or speed_frame() == "trap") and not (conjoin() and styling.number_of_keywords == "2") then x + 41 else x
+		height: 31
+		alignment: { if (card.keysymbolreal == "Blank" or speed_frame() == "trap") and not (conjoin() and styling.number_of_keywords == "2") then "center middle shrink-overflow" else "left middle shrink-overflow"}
+		visible: { (styling.no_of_keywords == "1" or (styling.no_of_keywords == "2" and conjoin())) and speed_frame() != "origin" }
+		z index: 4
+		font:
+			name: { if set.Keyword_Font == "" then "BeaufortforLOL-Bold" else set.Keyword_Font }
+			size: 16
+			color: { set.Keyword_Color }
+	keysymbolreal:
+		left: { 66 + keyword_chop()/2 }
+		top: { if styling.no_of_keywords == "1" then keyword_height() + 12 else -50 }
+		width:	30
+		height:	30
+		z index: 5
+		render style: image
+		visible: { styling.no_of_keywords == "1" }
+		choice images:
+			Spell Burst: /LoR.mse-game/keywords/box/burst.png
+			Spell Focus: /LoR.mse-game/keywords/box/focus.png
+			Spell Fast: /LoR.mse-game/keywords/box/fast.png
+			Spell Slow: /LoR.mse-game/keywords/box/slow.png
+			Spell Skill: /LoR.mse-game/keywords/box/skill.png
+			Spell Equipment: /LoR.mse-game/keywords/box/equipment.png
+			Standard Attach: /LoR.mse-game/keywords/box/attach.png
+			Standard Attune: /LoR.mse-game/keywords/box/attune.png
+			Standard Augment: /LoR.mse-game/keywords/box/augment.png
+			Standard Barrier: /LoR.mse-game/keywords/box/barrier.png
+			Standard Can't Attack: /LoR.mse-game/keywords/box/cantattack.png
+			Standard Can't Block: /LoR.mse-game/keywords/box/cantblock.png
+			Standard Challenger: /LoR.mse-game/keywords/box/challenger.png
+			Standard Deep: /LoR.mse-game/keywords/box/deep.png
+			Standard Double Attack: /LoR.mse-game/keywords/box/doubleattack.png
+			Standard Ephemeral: /LoR.mse-game/keywords/box/ephemeral.png
+			Standard Elusive: /LoR.mse-game/keywords/box/elusive.png
+			Standard Evolve: /LoR.mse-game/keywords/box/evolve.png
+			Standard Fated: /LoR.mse-game/keywords/box/fated.png
+			Standard Fearsome: /LoR.mse-game/keywords/box/fearsome.png
+			Standard Fleeting: /LoR.mse-game/keywords/box/fleeting.png
+			Standard Formidable: /LoR.mse-game/keywords/box/formidable.png
+			Standard Fury: /LoR.mse-game/keywords/box/fury.png
+			Standard Hallowed: /LoR.mse-game/keywords/box/hallowed.png
+			Standard Impact: /LoR.mse-game/keywords/box/impact.png
+			Standard Lifesteal: /LoR.mse-game/keywords/box/lifesteal.png
+			Standard Lurk: /LoR.mse-game/keywords/box/lurk.png
+			Standard Overwhelm: /LoR.mse-game/keywords/box/overwhelm.png
+			Standard Quick Attack: /LoR.mse-game/keywords/box/quickattack.png
+			Standard Regeneration: /LoR.mse-game/keywords/box/regeneration.png
+			Standard Scout: /LoR.mse-game/keywords/box/scout.png
+			Standard SpellShield: /LoR.mse-game/keywords/box/spellshield.png
+			Standard Tough: /LoR.mse-game/keywords/box/tough.png
+			Standard Vulnerable: /LoR.mse-game/keywords/box/vulnerable.png
+			Custom Symbol 1: { if set.Custom_Symbol_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_1 }
+			Custom Symbol 2: { if set.Custom_Symbol_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_2 }
+			Custom Symbol 3: { if set.Custom_Symbol_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_3 }
+			Custom Symbol 4: { if set.Custom_Symbol_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_4 }
+			Custom Symbol 5: { if set.Custom_Symbol_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_5 }
+			Custom Symbol 6: { if set.Custom_Symbol_6 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_6 }
+			Custom Symbol 7: { if set.Custom_Symbol_7 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_7 }
+			Custom Symbol 8: { if set.Custom_Symbol_8 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_8 }
+			Custom Symbol 9: { if set.Custom_Symbol_9 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_9 }
+			Custom Symbol 10: { if set.Custom_Symbol_10 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_10 }
+			Landmark: /LoR.mse-game/keywords/box/landmark.png
+	keysymbol1:
+		left : 
+			script:
+				if conjoin() then 
+					if (styling.no_of_keywords == "2") then
+						50 + keyword_chop()/2
+					else 209 - 37*styling.no_of_keywords
+				else 187 - 37*styling.no_of_keywords
+		top : { if styling.no_of_keywords > 1 then keyword_height() + 10 else -50 }
+		width:	30
+		height:	30
+		z index: 3
+		render style: image
+		visible: { styling.no_of_keywords > 1 }
+		choice images:
+			Spell Burst: /LoR.mse-game/keywords/box/burst.png
+			Spell Focus: /LoR.mse-game/keywords/box/focus.png
+			Spell Fast: /LoR.mse-game/keywords/box/fast.png
+			Spell Slow: /LoR.mse-game/keywords/box/slow.png
+			Spell Skill: /LoR.mse-game/keywords/box/skill.png
+			Spell Equipment: /LoR.mse-game/keywords/box/equipment.png
+			Standard Attach: /LoR.mse-game/keywords/box/attach.png
+			Standard Attune: /LoR.mse-game/keywords/box/attune.png
+			Standard Augment: /LoR.mse-game/keywords/box/augment.png
+			Standard Barrier: /LoR.mse-game/keywords/box/barrier.png
+			Standard Can't Attack: /LoR.mse-game/keywords/box/cantattack.png
+			Standard Can't Block: /LoR.mse-game/keywords/box/cantblock.png
+			Standard Challenger: /LoR.mse-game/keywords/box/challenger.png
+			Standard Deep: /LoR.mse-game/keywords/box/deep.png
+			Standard Double Attack: /LoR.mse-game/keywords/box/doubleattack.png
+			Standard Ephemeral: /LoR.mse-game/keywords/box/ephemeral.png
+			Standard Elusive: /LoR.mse-game/keywords/box/elusive.png
+			Standard Evolve: /LoR.mse-game/keywords/box/evolve.png
+			Standard Fated: /LoR.mse-game/keywords/box/fated.png
+			Standard Fearsome: /LoR.mse-game/keywords/box/fearsome.png
+			Standard Fleeting: /LoR.mse-game/keywords/box/fleeting.png
+			Standard Formidable: /LoR.mse-game/keywords/box/formidable.png
+			Standard Fury: /LoR.mse-game/keywords/box/fury.png
+			Standard Hallowed: /LoR.mse-game/keywords/box/hallowed.png
+			Standard Impact: /LoR.mse-game/keywords/box/impact.png
+			Standard Lifesteal: /LoR.mse-game/keywords/box/lifesteal.png
+			Standard Lurk: /LoR.mse-game/keywords/box/lurk.png
+			Standard Overwhelm: /LoR.mse-game/keywords/box/overwhelm.png
+			Standard Quick Attack: /LoR.mse-game/keywords/box/quickattack.png
+			Standard Regeneration: /LoR.mse-game/keywords/box/regeneration.png
+			Standard Scout: /LoR.mse-game/keywords/box/scout.png
+			Standard SpellShield: /LoR.mse-game/keywords/box/spellshield.png
+			Standard Tough: /LoR.mse-game/keywords/box/tough.png
+			Standard Vulnerable: /LoR.mse-game/keywords/box/vulnerable.png
+			Custom Symbol 1: { if set.Custom_Symbol_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_1 }
+			Custom Symbol 2: { if set.Custom_Symbol_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_2 }
+			Custom Symbol 3: { if set.Custom_Symbol_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_3 }
+			Custom Symbol 4: { if set.Custom_Symbol_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_4 }
+			Custom Symbol 5: { if set.Custom_Symbol_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_5 }
+			Custom Symbol 6: { if set.Custom_Symbol_6 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_6 }
+			Custom Symbol 7: { if set.Custom_Symbol_7 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_7 }
+			Custom Symbol 8: { if set.Custom_Symbol_8 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_8 }
+			Custom Symbol 9: { if set.Custom_Symbol_9 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_9 }
+			Custom Symbol 10: { if set.Custom_Symbol_10 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_10 }
+			Landmark: /LoR.mse-game/keywords/box/landmark.png
+	keysymbol2:
+		left :
+			script:
+				if conjoin() then 
+					if (styling.no_of_keywords == "2") then
+						80 + keyword_chop()/2
+					else 239 - 37*styling.no_of_keywords
+				else 261 - 37*styling.no_of_keywords
+		top : { if styling.no_of_keywords > 1 then keyword_height() + 10 else -50 }
+		width:	30
+		height:	30
+		z index: 3
+		render style: image
+		visible: { styling.no_of_keywords > 1 }
+		choice images:
+			Spell Burst: /LoR.mse-game/keywords/box/burst.png
+			Spell Focus: /LoR.mse-game/keywords/box/focus.png
+			Spell Fast: /LoR.mse-game/keywords/box/fast.png
+			Spell Slow: /LoR.mse-game/keywords/box/slow.png
+			Spell Skill: /LoR.mse-game/keywords/box/skill.png
+			Spell Equipment: /LoR.mse-game/keywords/box/equipment.png
+			Standard Attach: /LoR.mse-game/keywords/box/attach.png
+			Standard Attune: /LoR.mse-game/keywords/box/attune.png
+			Standard Augment: /LoR.mse-game/keywords/box/augment.png
+			Standard Barrier: /LoR.mse-game/keywords/box/barrier.png
+			Standard Can't Attack: /LoR.mse-game/keywords/box/cantattack.png
+			Standard Can't Block: /LoR.mse-game/keywords/box/cantblock.png
+			Standard Challenger: /LoR.mse-game/keywords/box/challenger.png
+			Standard Deep: /LoR.mse-game/keywords/box/deep.png
+			Standard Double Attack: /LoR.mse-game/keywords/box/doubleattack.png
+			Standard Ephemeral: /LoR.mse-game/keywords/box/ephemeral.png
+			Standard Elusive: /LoR.mse-game/keywords/box/elusive.png
+			Standard Evolve: /LoR.mse-game/keywords/box/evolve.png
+			Standard Fated: /LoR.mse-game/keywords/box/fated.png
+			Standard Fearsome: /LoR.mse-game/keywords/box/fearsome.png
+			Standard Fleeting: /LoR.mse-game/keywords/box/fleeting.png
+			Standard Formidable: /LoR.mse-game/keywords/box/formidable.png
+			Standard Fury: /LoR.mse-game/keywords/box/fury.png
+			Standard Hallowed: /LoR.mse-game/keywords/box/hallowed.png
+			Standard Impact: /LoR.mse-game/keywords/box/impact.png
+			Standard Lifesteal: /LoR.mse-game/keywords/box/lifesteal.png
+			Standard Lurk: /LoR.mse-game/keywords/box/lurk.png
+			Standard Overwhelm: /LoR.mse-game/keywords/box/overwhelm.png
+			Standard Quick Attack: /LoR.mse-game/keywords/box/quickattack.png
+			Standard Regeneration: /LoR.mse-game/keywords/box/regeneration.png
+			Standard Scout: /LoR.mse-game/keywords/box/scout.png
+			Standard SpellShield: /LoR.mse-game/keywords/box/spellshield.png
+			Standard Tough: /LoR.mse-game/keywords/box/tough.png
+			Standard Vulnerable: /LoR.mse-game/keywords/box/vulnerable.png
+			Custom Symbol 1: { if set.Custom_Symbol_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_1 }
+			Custom Symbol 2: { if set.Custom_Symbol_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_2 }
+			Custom Symbol 3: { if set.Custom_Symbol_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_3 }
+			Custom Symbol 4: { if set.Custom_Symbol_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_4 }
+			Custom Symbol 5: { if set.Custom_Symbol_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_5 }
+			Custom Symbol 6: { if set.Custom_Symbol_6 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_6 }
+			Custom Symbol 7: { if set.Custom_Symbol_7 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_7 }
+			Custom Symbol 8: { if set.Custom_Symbol_8 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_8 }
+			Custom Symbol 9: { if set.Custom_Symbol_9 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_9 }
+			Custom Symbol 10: { if set.Custom_Symbol_10 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_10 }
+			Landmark: /LoR.mse-game/keywords/box/landmark.png
+	keysymbol3:
+		left: { if conjoin() then 313 - 37*styling.no_of_keywords else 335 - 37*styling.no_of_keywords }
+		top : { if styling.no_of_keywords > 2 then keyword_height() + 10 else -50 }
+		width:	30
+		height:	30
+		z index: 3
+		render style: image
+		visible: { styling.no_of_keywords > 2 }
+		choice images:
+			Spell Burst: /LoR.mse-game/keywords/box/burst.png
+			Spell Focus: /LoR.mse-game/keywords/box/focus.png
+			Spell Fast: /LoR.mse-game/keywords/box/fast.png
+			Spell Slow: /LoR.mse-game/keywords/box/slow.png
+			Spell Skill: /LoR.mse-game/keywords/box/skill.png
+			Spell Equipment: /LoR.mse-game/keywords/box/equipment.png
+			Standard Attach: /LoR.mse-game/keywords/box/attach.png
+			Standard Attune: /LoR.mse-game/keywords/box/attune.png
+			Standard Augment: /LoR.mse-game/keywords/box/augment.png
+			Standard Barrier: /LoR.mse-game/keywords/box/barrier.png
+			Standard Can't Attack: /LoR.mse-game/keywords/box/cantattack.png
+			Standard Can't Block: /LoR.mse-game/keywords/box/cantblock.png
+			Standard Challenger: /LoR.mse-game/keywords/box/challenger.png
+			Standard Deep: /LoR.mse-game/keywords/box/deep.png
+			Standard Double Attack: /LoR.mse-game/keywords/box/doubleattack.png
+			Standard Ephemeral: /LoR.mse-game/keywords/box/ephemeral.png
+			Standard Elusive: /LoR.mse-game/keywords/box/elusive.png
+			Standard Evolve: /LoR.mse-game/keywords/box/evolve.png
+			Standard Fated: /LoR.mse-game/keywords/box/fated.png
+			Standard Fearsome: /LoR.mse-game/keywords/box/fearsome.png
+			Standard Fleeting: /LoR.mse-game/keywords/box/fleeting.png
+			Standard Formidable: /LoR.mse-game/keywords/box/formidable.png
+			Standard Fury: /LoR.mse-game/keywords/box/fury.png
+			Standard Hallowed: /LoR.mse-game/keywords/box/hallowed.png
+			Standard Impact: /LoR.mse-game/keywords/box/impact.png
+			Standard Lifesteal: /LoR.mse-game/keywords/box/lifesteal.png
+			Standard Lurk: /LoR.mse-game/keywords/box/lurk.png
+			Standard Overwhelm: /LoR.mse-game/keywords/box/overwhelm.png
+			Standard Quick Attack: /LoR.mse-game/keywords/box/quickattack.png
+			Standard Regeneration: /LoR.mse-game/keywords/box/regeneration.png
+			Standard Scout: /LoR.mse-game/keywords/box/scout.png
+			Standard SpellShield: /LoR.mse-game/keywords/box/spellshield.png
+			Standard Tough: /LoR.mse-game/keywords/box/tough.png
+			Standard Vulnerable: /LoR.mse-game/keywords/box/vulnerable.png
+			Custom Symbol 1: { if set.Custom_Symbol_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_1 }
+			Custom Symbol 2: { if set.Custom_Symbol_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_2 }
+			Custom Symbol 3: { if set.Custom_Symbol_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_3 }
+			Custom Symbol 4: { if set.Custom_Symbol_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_4 }
+			Custom Symbol 5: { if set.Custom_Symbol_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_5 }
+			Custom Symbol 6: { if set.Custom_Symbol_6 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_6 }
+			Custom Symbol 7: { if set.Custom_Symbol_7 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_7 }
+			Custom Symbol 8: { if set.Custom_Symbol_8 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_8 }
+			Custom Symbol 9: { if set.Custom_Symbol_9 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_9 }
+			Custom Symbol 10: { if set.Custom_Symbol_10 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_10 }
+			Landmark: /LoR.mse-game/keywords/box/landmark.png
+	keysymbol4:
+		left: { if conjoin() then 387 - 37*styling.no_of_keywords else 409 - 37*styling.no_of_keywords }
+		top : { if styling.no_of_keywords > 3 then keyword_height() + 10 else -50 }
+		width:	30
+		height:	30
+		z index: 3
+		render style: image
+		visible: { styling.no_of_keywords > 3 }
+		choice images:
+			Spell Burst: /LoR.mse-game/keywords/box/burst.png
+			Spell Focus: /LoR.mse-game/keywords/box/focus.png
+			Spell Fast: /LoR.mse-game/keywords/box/fast.png
+			Spell Slow: /LoR.mse-game/keywords/box/slow.png
+			Spell Skill: /LoR.mse-game/keywords/box/skill.png
+			Spell Equipment: /LoR.mse-game/keywords/box/equipment.png
+			Standard Attach: /LoR.mse-game/keywords/box/attach.png
+			Standard Attune: /LoR.mse-game/keywords/box/attune.png
+			Standard Augment: /LoR.mse-game/keywords/box/augment.png
+			Standard Barrier: /LoR.mse-game/keywords/box/barrier.png
+			Standard Can't Attack: /LoR.mse-game/keywords/box/cantattack.png
+			Standard Can't Block: /LoR.mse-game/keywords/box/cantblock.png
+			Standard Challenger: /LoR.mse-game/keywords/box/challenger.png
+			Standard Deep: /LoR.mse-game/keywords/box/deep.png
+			Standard Double Attack: /LoR.mse-game/keywords/box/doubleattack.png
+			Standard Ephemeral: /LoR.mse-game/keywords/box/ephemeral.png
+			Standard Elusive: /LoR.mse-game/keywords/box/elusive.png
+			Standard Evolve: /LoR.mse-game/keywords/box/evolve.png
+			Standard Fated: /LoR.mse-game/keywords/box/fated.png
+			Standard Fearsome: /LoR.mse-game/keywords/box/fearsome.png
+			Standard Fleeting: /LoR.mse-game/keywords/box/fleeting.png
+			Standard Formidable: /LoR.mse-game/keywords/box/formidable.png
+			Standard Fury: /LoR.mse-game/keywords/box/fury.png
+			Standard Hallowed: /LoR.mse-game/keywords/box/hallowed.png
+			Standard Impact: /LoR.mse-game/keywords/box/impact.png
+			Standard Lifesteal: /LoR.mse-game/keywords/box/lifesteal.png
+			Standard Lurk: /LoR.mse-game/keywords/box/lurk.png
+			Standard Overwhelm: /LoR.mse-game/keywords/box/overwhelm.png
+			Standard Quick Attack: /LoR.mse-game/keywords/box/quickattack.png
+			Standard Regeneration: /LoR.mse-game/keywords/box/regeneration.png
+			Standard Scout: /LoR.mse-game/keywords/box/scout.png
+			Standard SpellShield: /LoR.mse-game/keywords/box/spellshield.png
+			Standard Tough: /LoR.mse-game/keywords/box/tough.png
+			Standard Vulnerable: /LoR.mse-game/keywords/box/vulnerable.png
+			Custom Symbol 1: { if set.Custom_Symbol_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_1 }
+			Custom Symbol 2: { if set.Custom_Symbol_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_2 }
+			Custom Symbol 3: { if set.Custom_Symbol_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_3 }
+			Custom Symbol 4: { if set.Custom_Symbol_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_4 }
+			Custom Symbol 5: { if set.Custom_Symbol_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_5 }
+			Custom Symbol 6: { if set.Custom_Symbol_6 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_6 }
+			Custom Symbol 7: { if set.Custom_Symbol_7 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_7 }
+			Custom Symbol 8: { if set.Custom_Symbol_8 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_8 }
+			Custom Symbol 9: { if set.Custom_Symbol_9 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_9 }
+			Custom Symbol 10: { if set.Custom_Symbol_10 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_10 }
+			Landmark: /LoR.mse-game/keywords/box/landmark.png
+	#############################
+	cost:
+		z index: 4
+		left:	19.5
+		top:	33.5
+		width:	50
+		height:	33
+		alignment: center middle shrink-overflow
+		font:
+			name: { if set.Stats_Font == "" then "BeaufortforLOL-Bold" else set.Stats_Font }
+			weight: bold
+			size: 34
+			color: { set.Stats_Color }
+			shadow color: rgb(0, 0, 0)
+			shadow blur: 1
+	health:
+		z index: 4
+		left:	258
+		top:
+			script:
+				fr := speed_frame()
+				if (fr == "equipment") then 222
+				else -100 
+		width:	59
+		height:	28
+		alignment: center middle shrink-overflow
+		font:
+			name: { if set.Stats_Font == "" then "BeaufortforLOL-Bold" else set.Stats_Font }
+			weight: bold
+			size: 27
+			color: { set.Stats_Color }
+			shadow color: rgb(0, 0, 0)
+			shadow blur: 1
+	power:
+		z index: 4
+		left:	24
+		top:
+			script:
+				fr := speed_frame()
+				if (fr == "equipment") then 222
+				else -100 
+		width:	58
+		height:	28
+		alignment: center middle shrink-overflow
+		font:
+			name: { if set.Stats_Font == "" then "BeaufortforLOL-Bold" else set.Stats_Font }
+			weight: bold
+			size: 26
+			color: { set.Stats_Color }
+			shadow color: rgb(0, 0, 0)
+			shadow blur: 1
+	############################# Card sorting / numbering
+	############################# Copyright stuff
+	illustrator:
+		left: 32
+		top : 492
+		width: 100
+		height: 12
+		alignment: left middle
+		z index: 1
+		font:
+			name: { if set.Illustrator_and_Designer_Font == "" then "BeaufortforLOL-Bold" else set.Illustrator_and_Designer_Font }
+			size: 8
+			color: { set.Illustrator_and_Designer_Color }
+	copyright line:
+		right: 330
+		top : 492
+		width: 122
+		height: 12
+		alignment: right middle
+		z index: 1
+		font:
+			name: { if set.Illustrator_and_Designer_Font == "" then "BeaufortforLOL-Bold" else set.Illustrator_and_Designer_Font }
+			size: 8
+			color: { set.Illustrator_and_Designer_Color }
+############################################################## Extra card fields
+extra card field:
+	type: text
+	name: token
+	show statistics: false
+	description: The type of the token
+extra card style:
+	token:
+		left: 0
+		top : -300
+		width: 0
+		height: 0
+		visible: false
+
+#### above was left in for legacy reasons
+						
+extra card field:
+	type: choice
+	name: stamp
+	choice: normal
+	show statistics: false
+	editable: false
+extra card style:
+	stamp:
+		left:	10
+		top:	97
+		width:	52
+		height:	52
+		z index: 0
+		render style: image
+		choice images:
+			normal: 
+				script:
+					fr := speed_frame()
+					if (fr == "skill") then "/LoR.mse-game/frame/spell/skillstamp.png"
+					else if (fr == "focus") then "/LoR.mse-game/frame/spell/focusstamp.png"
+					else if (fr == "burst") then "/LoR.mse-game/frame/spell/burststamp.png"
+					else if (fr == "fast") then "/LoR.mse-game/frame/spell/faststamp.png"
+					else if (fr == "equipment") then "/LoR.mse-game/frame/spell/equipstamp.png"
+					## else if (fr == "slow") then "/LoR.mse-game/frame/spell/slowstamp.png"
+					## else if (fr == "trap") then "/LoR.mse-game/frame/spell/nostamp.png"
+					else "" 
+					
+extra card field:
+	type: choice
+	name: gemstamp
+	choice: normal
+	show statistics: false
+	editable: false
+extra card style:
+	gemstamp:
+		left:	0
+		top:	{ if (speed_frame() == "slow" or speed_frame() == "equipment") then 0 else 1 }
+		width:	340
+		height:	512
+		z index: 5
+		render style: image
+		choice images:
+			normal: 
+				script:
+					fr := speed_frame()
+					if (fr == "skill" or fr == "origin") then (fr := "trap")
+					if (card.rarity == "Epic" and card.typetype != "" and fr != "trap") then "/LoR.mse-game/frame/spell/epicstamp.png"
+					else if (card.rarity == "Rare" and card.typetype != "" and fr != "trap") then "/LoR.mse-game/frame/spell/rarestamp.png"
+					else if (card.rarity == "Common" and card.typetype != "" and fr != "trap") then "/LoR.mse-game/frame/spell/commonstamp.png"
+					else ""
+									
+extra card field:
+	type: choice
+	name: equipbits
+	choice: normal
+	show statistics: false
+	editable: false
+extra card style:
+	equipbits:
+		left:	0
+		top:	0
+		width:	340
+		height:	512
+		z index: 0
+		render style: image
+		choice images:
+			normal: 
+				script:
+					fr := speed_frame()
+					if (fr == "equipment") then "/LoR.mse-game/frame/spell/equipbits.png"
+					else "" 
+			
+extra card field:
+	type: text
+	name: prompt
+	show statistics: false
+	editable: false
+	script: if card.colorback == rgb(127,127,127) then "click to set colour                               click to set colour" else ""
+extra card style:
+	prompt:
+		left: 25
+		top : { keyword_height() + 13 }
+		width: 284
+		height: 25
+		alignment: center middle shrink-overflow
+		padding left:   4
+		padding top:    2
+		padding right:  4
+		padding bottom: 2
+		z index: 6
+		visible: { set.use_colour_prompts }
+		font:
+			name: Arial
+			size: 8
+			color: rgb(255, 255, 255)

@@ -1,0 +1,66 @@
+﻿
+############################################################## Card pack items
+pack type:
+	name: C
+	filter: card.rarity == "Common"
+pack type:
+	name: R
+	filter: card.rarity == "Rare"
+pack type:
+	name: RR
+	filter: card.rarity == "Double Rare"
+pack type:
+	name: RRR
+	filter: card.rarity == "Triple Rare"
+pack type:
+	name: VR
+	filter: card.rarity == "Vanguard Rare"
+pack type:
+	name: AnyRare
+	filter: card.rarity != "Common"
+pack type:
+	name: card
+	filter: card.set_number != ""
+############################################################## Card packs
+pack type:
+	name: Booster Pack
+	item:
+		name: AnyRare
+		amount: 2
+	item:
+		name: C
+		amount: 5
+pack type:
+	name: Booster Box
+	item:
+		name: VR
+		amount: 1
+	item:
+		name: RRR
+		amount: 3
+	item:
+		name: RR
+		amount: 6
+	item:
+		name: R
+		amount: 22
+	item:
+		name: C
+		amount: 80
+pack type:
+	name: Carton
+	item:
+		name: VR
+		amount: 20
+	item:
+		name: RRR
+		amount: 60
+	item:
+		name: RR
+		amount: 120
+	item:
+		name: R
+		amount: 440
+	item:
+		name: C
+		amount: 1600

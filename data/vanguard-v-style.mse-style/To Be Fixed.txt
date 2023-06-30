@@ -1,0 +1,9 @@
+Trigger Unit Base
+Shield 0-15k
+All Flags
+Priority: DZ, Maga, Zoo
+Grades 0-3
+
+To Be Added:
+Counter Charge
+Soul Charge

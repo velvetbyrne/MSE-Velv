@@ -1,0 +1,1607 @@
+mse version: 0.3.9
+game: vanguard
+short name:  V Series
+full name: Vanguard V Series
+icon: icon.png
+position hint: 2
+installer group: Vanguard/V Series
+
+version: 2021-04-04.01
+depends on:
+	package: vanguard.mse-game
+	version: 2021-04-04.01
+depends on:
+	package: vanguard-v-symbols.mse-symbol-font
+	version: 2021-04-04.01
+depends on:
+	package: vanguard-v-rarity-symbols.mse-symbol-font
+	version: 2020-08-09.01
+
+card width: 348
+card height: 508
+card dpi: 140
+card background: rgb(200,200,200)
+
+init script:
+	image_mask := {
+		if is_order() then "bg_color_mask_order.png"
+		else if has_no_bottom() then "bg_color_mask_special.png"
+		else "bg_color_mask.png"
+	}
+	
+	special_print_text := {
+		not is_order() and (styling.special_print == "No Unit Border" or styling.special_print == "No Effect Box")
+	}
+	
+	##Outline Locations
+	###Name Text
+	name_left := { 52 }
+	name_top := { if is_order() then 335 else 435 }
+	name_width := { 240 }
+	name_height := { 17.478 }
+	name_color := {
+		if is_gunit() then rgb(250,250,250)
+		else rgb(0,0,0)
+	}
+	name_shadow := {
+		if is_gunit() then rgb(255,253,203)
+		else rgb(255,255,255)
+	}
+	#name_outline := { 4 }
+	
+	###Clan Text
+	clan_left := { if is_order() then 121 else 210 }
+	clan_top := { if is_order() then 493 else 461 }
+	clan_width := { if is_order() then 101 else 87.8 }
+	clan_height := { if is_order() then 15 else 15 }
+	clan_color := {
+		if card.nation == "Star Gate" then rgb(0,0,0)
+		else rgb(255,255,255)
+	}
+	clan_shadow := {
+		if card.clan == "Link Joker" then rgb(255,0,0)
+		else if card.nation == "Star Gate" then rgb(255,255,255)
+		else rgb(0,0,0)
+	}
+	clan_shadow2 := { rgb(255,255,255) }
+	nation_shadows := {
+		if card.nation == "United Sanctuary" then  rgb(255,218,11)
+		else if card.nation == "Dragon Empire" then rgb(255,36,37)
+		else if card.nation == "Dark Zone" then rgb(101,21,138)
+		else if card.nation == "Magallanica" then rgb(0,149,255)
+		else if card.nation == "Zoo" then rgb(0,127,14)
+		else if card.nation == "Star Gate" then rgb(255,255,255)
+		else rgb(0,0,0)
+	}
+	#clan_outline := { 2 }
+	
+	###Race Text
+	race_left := { if is_order() then 121 else 207 }
+	race_top := { 480 }
+	race_width := { if is_order() then 101 else 92.8 }
+	race_height := { 10 }
+	race_color := { rgb(255,255,255) }
+	race_shadow := { rgb(0,0,0) }
+	#race_outline := { 2 }
+	
+	###Power Text
+	power_left := { 55 }
+	power_top := { 468 }
+	power_width := { 80 }
+	power_height := { 17 }
+	power_color := { rgb(213,200,56) }
+	power_shadow := { rgb(0,0,0) }
+	#power_outline := { 6 }
+	
+	###Critical Text
+	critical_left := { 182 }
+	critical_bottom := { 482 }
+	critical_width := { 13 }
+	critical_height := { 15 }
+	critical_color := { rgb(0,0,0) }
+	critical_shadow := {
+		if is_gunit() then rgb(255,253,203)
+		else rgb(255,255,255)
+	}
+	#critical_outline := { 2 }
+	
+	###Ability Text
+	ability_left := { 15 }
+	ability_bottom := { if is_order() then 492 else 420 }
+	ability_width := { 315 }
+	ability_height := { if is_order() then 128 else 165 }
+	ability_color := { if is_order() then rgb(255,255,255) else rgb(0,0,0) }
+	ability_shadow := { if is_order() then rgb(0,0,0) else rgba(255,255,255,255) }
+	ability_alignment := { if is_order() then "top left overflow-shrink" else "bottom left overflow-shrink" }
+	#ability_outline := { 2 }
+	
+	##Bottom Text
+	bottom_text_colour := {
+		if is_trigger() or has_no_bottom() then rgb(0,0,0)
+		else rgb(255,255,255)
+	}
+	bottom_text_shadow := {
+		if is_trigger() or has_no_bottom() then rgb(255,255,255)
+		else rgb(0,0,0)
+	}
+	
+	###Set Number Text
+		set_num_left := { 20 }
+		set_num_bottom := { 515 }
+		set_num_width := { 80 }
+		set_num_height := { 20 }
+	###Illustrator Text
+		illustrator_left := { 150 }
+		illustrator_bottom := { 515 }
+		illustrator_width := { 188 }
+		illustrator_height := { 20 }
+
+styling field:
+	type: choice
+	name: special print
+	description: Type of Special Print used.
+	choice: None
+	choice: No Effect Box
+	choice: No Unit Border
+
+card style:
+	bg_color:
+		top: 0
+		left: 0
+		height: 508
+		width: 348
+		z index: -6
+		mask: { image_mask() }
+
+	type:
+		bottom: 508
+		left: 0
+		height: { if is_order() then 190 else 79 }
+		width: 348
+		z index: -3
+		render style: image
+		choice images:
+			Normal:
+				script:
+					if has_no_bottom() then "unit_special.png"
+					else "unit.png"
+			Trigger: trigger.png
+			G Unit: unitg.png
+			G Guardian: guardianG.png
+			Token: token.png
+			Normal Order: order.png
+			Blitz Order: order_blitz.png
+	
+	legion:
+		bottom: 508
+		left: 0
+		height: 100
+		width: 25
+		render style: image
+		visible: { is_unit() }
+		
+	legiondisplay:
+		bottom: 508
+		left: 0
+		height: 100
+		width: 348
+		render style: image
+		visible: { is_unit() }
+		choice images:
+			lord: legionL.png
+			mate: legionR.png
+			
+	nation:
+		right: { if is_order() then 225 else if has_no_bottom() then 333 else 335 }
+		bottom: { if is_order() then 508 else if has_no_bottom() then 485 else 466 }
+		width: { if is_order() then 107 else if has_no_bottom() then 46 else 31 }
+		height: { if is_order() then 18 else if has_no_bottom() then 23 else 15 }
+		z index: -3
+		render style: image
+		choice images:
+			Zoo: { if is_order() then "Z_order.png" else "flagZoo.png" }
+			United Sanctuary: { if is_order() then "US_order.png" else "flagUS.png" }
+			Dark Zone: { if is_order() then "DZ_order.png" else "flagDZ.png" }
+			Dragon Empire: { if is_order() then "DE_order.png" else "flagDE.png" }
+			Star Gate: { if is_order() then "SG_order.png" else "flagSG.png" }
+			Magallanica: { if is_order() then "M_order.png" else "flagMaga.png" }
+
+	image:
+		top: 0
+		left: 0
+		height: 508
+		width: 348
+		z index: -4
+		mask: { image_mask() }
+		default: image_bg.png
+
+	name:
+		left: { name_left() }
+		top: { name_top() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: 0
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_color() }
+			shadow color: { name_shadow() }
+			shadow blur: 4
+
+	power:
+		left: { power_left() }
+		top: { power_top() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		z index: 0
+		visible: { is_unit() and card.type != "G Guardian" }
+		font:
+			name: Impact
+			size: 17
+			style: italic
+			color: { power_color() }
+			shadow color: { power_shadow() }
+			shadow displacement x: 0
+			shadow displacement y: 0
+			shadow blur: 8
+
+	grade:
+		top: 10
+		left: 8
+		height: 41
+		width: 38
+		z index: 0
+		render style: image
+		choice images:
+			0: grade0.png
+			1: grade1.png
+			2: grade2.png
+			3: grade3.png
+			4: { if is_gunit() then "grade4G.png" else "grade4.png" }
+	
+	skill:
+		top: 51
+		left: 8
+		height: 33
+		width: 39
+		z index: 0
+		render style: image
+		visible: { is_unit() }
+		choice images:
+			Boost: boost.png
+			Intercept: intercept.png
+			Twin Drive: twindrive.png
+			Triple Drive: tripledrive.png
+
+	gift:
+		top: 88
+		left: 7
+		height: 46
+		width: 39
+		z index: 1
+		render style: image
+		visible: { is_unit() }
+		choice images:
+			Accel: giftAccel.png
+			Force: giftForce.png
+			Protect: giftProtect.png
+			
+	Trigger:
+		top: {if card.type == "Trigger" then true and 0}
+		right: {if card.type == "Trigger" then true and 348}
+		height: {if card.type == "Trigger" then true and 100}
+		width: {if card.type == "Trigger" then true and 75}
+		z index: -1
+		render style: image
+		visible: {card.type == "Trigger"}
+		choice images:
+			Heal: htrigger.png
+			Stand: strigger.png
+			Critical: ctrigger.png
+			Draw: dtrigger.png
+			Front: ftrigger.png
+	
+	shield:
+		top: 126
+		left: 0
+		height: 111
+		width: 35
+		z index: 0
+		render style: image
+		visible: { is_unit() }
+		choice images:
+			5000: shield5k.png
+			10000: shield10k.png
+			15000: { if is_gunit() then "shieldG.png" else "shield15k.png" }
+			20000: shield20k.png
+			30000: shield30k.png
+			50000: shield50k.png
+			0: shieldSentinel.png
+			
+	color:
+		top: 458.312
+		left: 193.024
+		height: 15.536
+		width: 115.816
+		z index: -4
+		render style: image
+		visible: { not has_no_bottom() }
+		choice images:
+			United Sanctuary: US.png
+			Dragon Empire: DE.png
+			Dark Zone: DZ.png
+			Magallanica: M.png
+			Zoo: Z.png
+			Star Gate: SG.png
+			Cray Elemental: CE.png
+
+	clan:
+		left: { clan_left() }
+		top: { clan_top() }
+		width: { clan_width() }
+		height: { clan_height() }
+		z index: 1
+		alignment: center overflow-shrink
+		visible: { card.type != "Other" }
+		font:
+			name: Optima
+			size: 8
+			scale down to: 8.5
+			weight: bold
+			color: { clan_color() }
+			shadow color: { clan_shadow() }
+			shadow displacement x: 0
+			shadow displacement y: 0
+			shadow blur: 3
+	
+	race:
+		left: { race_left() }
+		top: { race_top() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 1
+		alignment: center overflow-shrink
+		visible: { card.type != "Other" }
+		font:
+			name: Optima-Thin
+			size: 12
+			scale down to: 8
+			color: { race_color() }
+			weight: bold
+			shadow color: { race_shadow() }
+			shadow displacement x: 0
+			shadow displacement y: 0
+			shadow blur: 2
+	
+	text:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: 0
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		font:
+			name: Optima
+			size: 8.5
+			#weight: bold
+			scale down to: 5
+			color: { ability_color() }
+			shadow color: { rgb(255,255,255) }
+			shadow blur: 1
+			shadow displacement x: 0
+			shadow displacement y: 0
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: 12
+			alignment: middle center
+			
+	text_box_top:
+		bottom:
+			script: 420 - card_style.text.content_height
+			#script: card_style.text_box.bottom - card_style.text_box.height
+		left: 10
+		height: 9
+		width: 325
+		z index: -1
+		visible: { card.text != "" and not special_print_text() and not is_order() }
+		render style: image
+		choice images:
+			default: text_bg_top.png
+		
+	text_box:
+		bottom: 420
+		left: 10
+		height: 
+			script: card_style.text.content_height ###length(to_text(card.text))
+		width: 325
+		z index: -1
+		visible: { card.text != "" and not special_print_text() and not is_order() }
+		render style: image
+		choice images:
+			default: text_bg.png
+			
+	text_box_bottom:
+		top:
+			script: card_style.text_box.bottom
+		left: 10
+		height: 6
+		width: 325
+		z index: -1
+		visible: { card.text != "" and not special_print_text() and not is_order() }
+		render style: image
+		choice images:
+			default: text_bg_bottom.png
+			
+	flavor_box:
+		bottom: { if is_order() then 320 else if (card.text == "") then card_style.text.bottom - card_style.text.content_height else card_style.text.bottom - card_style.text.content_height - 14 }
+		left:
+			script: (348 - card_style.flavor.content_width) / 2 - 12 ### 20
+		height: { card_style.flavor.content_height + 2 }
+		width: 
+			script: card_style.flavor.content_width + 20
+		z index: -1
+		visible: { if card.flavor != "" and not special_print_text() then true else false }
+		render style: image
+		choice images:
+			default: flavor_bg.png
+			
+	flavor:
+		bottom: { if is_order() then 320 else if (card.text =="") then card_style.text.bottom - card_style.text.content_height else card_style.text.bottom - card_style.text.content_height - 15 }
+		left: 20
+		height: 30
+		width: 304.23
+		z index: 0
+		alignment: bottom center overflow-shrink
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { not special_print_text() }
+		font:
+			name: MatrixBook
+			size: 9
+			weight: bold
+			scale down to: 7
+			color: rgb(255,255,255)
+			
+	illust:
+		left: { illustrator_left() }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_colour() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			
+	set number:
+		left: { set_num_left() }
+		bottom: { set_num_bottom() }
+		width: { set_num_width() }
+		height: { set_num_height() }
+		alignment: left top overflow-shrink
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_colour() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+		symbol font:
+			name: vanguard-v-rarity-symbols
+			scale down to: 6
+			size: 7.17
+			alignment: middle center
+	
+	critical:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		z index: 0
+		alignment: center top overflow-shrink
+		visible: { is_unit() }
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_color() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+
+##Text Outline for Name
+extra card field:
+	type: text
+	name: name blur 01
+	show statistics: false
+	default: card.name
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: name blur 02
+	show statistics: false
+	default: card.name
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: name blur 03
+	show statistics: false
+	default: card.name
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: name blur 04
+	show statistics: false
+	default: card.name
+	card list allow: false
+	save value: false
+	editable: false
+
+##Text Outline for Clan
+extra card field:
+	type: text
+	name: clan blur 01
+	show statistics: false
+	default: card.clan
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: clan blur 02
+	show statistics: false
+	default: card.clan
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: clan blur 03
+	show statistics: false
+	default: card.clan
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: clan blur 04
+	show statistics: false
+	default: card.clan
+	card list allow: false
+	save value: false
+	editable: false
+
+##Text Outline for Race
+extra card field:
+	type: text
+	name: race blur 01
+	show statistics: false
+	default: card.race
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: race blur 02
+	show statistics: false
+	default: card.race
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: race blur 03
+	show statistics: false
+	default: card.race
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: race blur 04
+	show statistics: false
+	default: card.race
+	card list allow: false
+	save value: false
+	editable: false
+
+##Text Outline for Power
+extra card field:
+	type: text
+	name: power blur 01
+	show statistics: false
+	default: card.power
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: power blur 02
+	show statistics: false
+	default: card.power
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: power blur 03
+	show statistics: false
+	default: card.power
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: power blur 04
+	show statistics: false
+	default: card.power
+	card list allow: false
+	save value: false
+	editable: false
+
+##Text Outline for Ability
+extra card field:
+	type: text
+	name: ability 1 blur 01
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: ability 1 blur 02
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: ability 1 blur 03
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: ability 1 blur 04
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+
+##Text Outline for Critical
+extra card field:
+	type: text
+	name: critical blur 01
+	show statistics: false
+	default: card.critical
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: critical blur 02
+	show statistics: false
+	default: card.critical
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: critical blur 03
+	show statistics: false
+	default: card.critical
+	card list allow: false
+	save value: false
+	editable: falseextra card field:
+	type: text
+	name: critical blur 04
+	show statistics: false
+	default: card.critical
+	card list allow: false
+	save value: false
+	editable: false
+##Text Outline for Set Number
+extra card field:
+	type: text
+	name: set number blur 01
+	show statistics: false
+	default: card.set_number
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: set number blur 02
+	show statistics: false
+	default: card.set_number
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: set number blur 03
+	show statistics: false
+	default: card.set_number
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: set number blur 04
+	show statistics: false
+	default: card.set_number
+	card list allow: false
+	save value: false
+	editable: false
+
+##Text Outline for Illustrator
+extra card field:
+	type: text
+	name: illust blur 01
+	show statistics: false
+	default: card.illust
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: illust blur 02
+	show statistics: false
+	default: card.illust
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: illust blur 03
+	show statistics: false
+	default: card.illust
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: illust blur 04
+	show statistics: false
+	default: card.illust
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: image
+	name: order border
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+extra card field:
+	type: text
+	name: illustrator text
+	default: "ILLUST/"
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+extra card field:
+	type: text
+	name: illustrator blur 01
+	default: "ILLUST/"
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+extra card field:
+	type: text
+	name: illustrator blur 02
+	default: "ILLUST/"
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+extra card field:
+	type: text
+	name: illustrator blur 03
+	default: "ILLUST/"
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+extra card field:
+	type: text
+	name: illustrator blur 04
+	default: "ILLUST/"
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+#card field:
+#	type: text
+#	name: text
+#	multi line: true
+#	script: text_filter(input: value, card_name: card.name)
+#	description: The card's card effect text.
+##Style
+extra card style:
+	##Illustrator Text
+	illustrator text:
+		left: { illustrator_left() - card_style.illust.content_width }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		visible: { card.illust != "" }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_colour() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+	
+	illustrator blur 01:
+		left: { illustrator_left() - card_style.illust.content_width }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		z index: -1
+		visible: { card.illust != "" and has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: -1
+	
+	illustrator blur 02:
+		left: { illustrator_left() - card_style.illust.content_width }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		z index: -1
+		visible: { card.illust != "" and has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: -1
+	
+	illustrator blur 03:
+		left: { illustrator_left() - card_style.illust.content_width }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		z index: -1
+		visible: { card.illust != "" and has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: 1
+	
+	illustrator blur 04:
+		left: { illustrator_left() - card_style.illust.content_width }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		z index: -1
+		visible: { card.illust != "" and has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: 1
+	
+	##Order Border
+	order border:
+		top: 0
+		left: 0
+		height: 330
+		width: 348
+		z index: -5
+		visible: { is_order() }
+		default: order_border.png
+	
+	##Name Text Outline
+	name blur 01:
+		left: { name_left() }
+		top: { name_top() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: -1
+		visible: { has_no_bottom() }
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_shadow() }
+			shadow color: { name_shadow() }
+			shadow blur: 2
+			shadow displacement x: -2
+			shadow displacement y: -2
+	
+	name blur 02:
+		left: { name_left() }
+		top: { name_top() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: -1
+		visible: { has_no_bottom() }
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_shadow() }
+			shadow color: { name_shadow() }
+			shadow blur: 2
+			shadow displacement x: 2
+			shadow displacement y: -2
+	
+	name blur 03:
+		left: { name_left() }
+		top: { name_top() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: -1
+		visible: { has_no_bottom() }
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_shadow() }
+			shadow color: { name_shadow() }
+			shadow blur: 2
+			shadow displacement x: -2
+			shadow displacement y: 2
+	
+	name blur 04:
+		left: { name_left() }
+		top: { name_top() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: -1
+		visible: { has_no_bottom() }
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_shadow() }
+			shadow color: { name_shadow() }
+			shadow blur: 2
+			shadow displacement x: 1
+			shadow displacement y: 1
+	
+	##Clan Text Outline
+	clan blur 01:
+		left: { clan_left() - 1 }
+		top: { clan_top() - 1 }
+		width: { clan_width() }
+		height: { clan_height() }
+		z index: 0
+		alignment: center overflow-shrink
+		visible: { if has_no_bottom() then card.type != "Other" }
+		font:
+			name: Optima
+			size: 8
+			scale down to: 8.5
+			weight: bold
+			color: { if card.clan == "Link Joker" or card.nation == "Star Gate" then clan_shadow() else nation_shadows() }
+			shadow color: { clan_shadow2() }
+			shadow displacement x: -1
+			shadow displacement y: -1
+			shadow blur: 2
+	
+	clan blur 02:
+		left: { clan_left() + 1 }
+		top: { clan_top() - 1 }
+		width: { clan_width() }
+		height: { clan_height() }
+		z index: 0
+		alignment: center overflow-shrink
+		visible: { if has_no_bottom() then card.type != "Other" }
+		font:
+			name: Optima
+			size: 8
+			scale down to: 8.5
+			weight: bold
+			color: { if card.clan == "Link Joker" or card.nation == "Star Gate" then clan_shadow() else nation_shadows() }
+			shadow color: { clan_shadow2() }
+			shadow displacement x: 1
+			shadow displacement y: -1
+			shadow blur: 2
+	
+	clan blur 03:
+		left: { clan_left() - 1 }
+		top: { clan_top() + 1 }
+		width: { clan_width() }
+		height: { clan_height() }
+		z index: 0
+		alignment: center overflow-shrink
+		visible: { if has_no_bottom() then card.type != "Other" }
+		font:
+			name: Optima
+			size: 8
+			scale down to: 8.5
+			weight: bold
+			color: { if card.clan == "Link Joker" or card.nation == "Star Gate" then clan_shadow() else nation_shadows() }
+			shadow color: { clan_shadow2() }
+			shadow displacement x: -1
+			shadow displacement y: 1
+			shadow blur: 2
+	
+	clan blur 04:
+		left: { clan_left() + 1 }
+		top: { clan_top() + 1 }
+		width: { clan_width() }
+		height: { clan_height() }
+		z index: 0
+		alignment: center overflow-shrink
+		visible: { if has_no_bottom() then card.type != "Other" }
+		font:
+			name: Optima
+			size: 8
+			scale down to: 8.5
+			weight: bold
+			color: { if card.clan == "Link Joker" or card.nation == "Star Gate" then clan_shadow() else nation_shadows() }
+			shadow color: { clan_shadow2() }
+			shadow displacement x: 2
+			shadow displacement y: 2
+			shadow blur: 2
+	
+	##Race Text Ouline
+	race blur 01:
+		left: { race_left() }
+		top: { race_top() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 0
+		alignment: center overflow-shrink
+		visible: { if has_no_bottom() then card.type != "Other" }
+		font:
+			name: Optima-Thin
+			size: 12
+			scale down to: 8
+			color: { race_shadow() }
+			weight: bold
+			shadow color: { race_shadow() }
+			shadow displacement x: -2
+			shadow displacement y: -2
+			shadow blur: 3
+	
+	race blur 02:
+		left: { race_left() }
+		top: { race_top() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 0
+		alignment: center overflow-shrink
+		visible: { if has_no_bottom() then card.type != "Other" }
+		font:
+			name: Optima-Thin
+			size: 12
+			scale down to: 8
+			color: { race_shadow() }
+			weight: bold
+			shadow color: { race_shadow() }
+			shadow displacement x: 2
+			shadow displacement y: -2
+			shadow blur: 3
+	
+	race blur 03:
+		left: { race_left() }
+		top: { race_top() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 0
+		alignment: center overflow-shrink
+		visible: { if has_no_bottom() then card.type != "Other" }
+		font:
+			name: Optima-Thin
+			size: 12
+			scale down to: 8
+			color: { race_shadow() }
+			weight: bold
+			shadow color: { race_shadow() }
+			shadow displacement x: -2
+			shadow displacement y: 2
+			shadow blur: 3
+	
+	race blur 04:
+		left: { race_left() }
+		top: { race_top() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 0
+		alignment: center overflow-shrink
+		visible: { if has_no_bottom() then card.type != "Other" }
+		font:
+			name: Optima-Thin
+			size: 12
+			scale down to: 8
+			color: { race_shadow() }
+			weight: bold
+			shadow color: { race_shadow() }
+			shadow displacement x: 2
+			shadow displacement y: 2
+			shadow blur: 3
+	
+	##Power Text Outline
+	power blur 01:
+		left: { power_left() }
+		top: { power_top() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		visible: { card.type != "G Guardian" and has_no_bottom() }
+		z index: -1
+		font:
+			name: Impact
+			size: 17
+			style: italic
+			color: { power_color() }
+			shadow color: { power_shadow() }
+			shadow displacement x: -3
+			shadow displacement y: -3
+			shadow blur: 4
+	
+	power blur 02:
+		left: { power_left() }
+		top: { power_top() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		visible: { card.type != "G Guardian" and has_no_bottom() }
+		z index: -1
+		font:
+			name: Impact
+			size: 17
+			style: italic
+			color: { power_color() }
+			shadow color: { power_shadow() }
+			shadow displacement x: 3
+			shadow displacement y: -3
+			shadow blur: 4
+	
+	power blur 03:
+		left: { power_left() }
+		top: { power_top() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		visible: { card.type != "G Guardian" and has_no_bottom() }
+		z index: -1
+		font:
+			name: Impact
+			size: 17
+			style: italic
+			color: { power_color() }
+			shadow color: { power_shadow() }
+			shadow displacement x: -3
+			shadow displacement y: 3
+			shadow blur: 4
+	
+	power blur 04:
+		left: { power_left() }
+		top: { power_top() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		visible: { card.type != "G Guardian" and has_no_bottom() }
+		z index: -1
+		font:
+			name: Impact
+			size: 17
+			style: italic
+			color: { power_color() }
+			shadow color: { power_shadow() }
+			shadow displacement x: 3
+			shadow displacement y: 3
+			shadow blur: 2
+	
+	##Ability Text Outline
+	ability 1 blur 01:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { special_print_text() }
+		font:
+			name: Optima
+			#weight: bold
+			#style: italic
+			size: 8.5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 2
+			shadow displacement x: -1
+			shadow displacement y: -1
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: 12
+			alignment: middle center
+	ability 1 blur 02:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { special_print_text() }
+		font:
+			name: Optima
+			#weight: bold
+			#style: italic
+			size: 8.5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: -1
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: 12
+			alignment: middle center
+	ability 1 blur 03:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { special_print_text() }
+		font:
+			name: Optima
+			#weight: bold
+			#style: italic
+			size: 8.5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: 1
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: 12
+			alignment: middle center
+	ability 1 blur 04:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { special_print_text() }
+		font:
+			name: Optima
+			#weight: bold
+			#style: italic
+			size: 8.5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: 1
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: 12
+			alignment: middle center
+	
+	##Critical Outline
+	critical blur 01:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		visible: { is_unit() }
+		z index: -1
+		alignment: center top overflow-shrink
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_shadow() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: -1
+	
+	critical blur 02:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		z index: -1
+		alignment: center top overflow-shrink
+		visible: { is_unit() }
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_shadow() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: -1
+	
+	critical blur 03:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		z index: -1
+		alignment: center top overflow-shrink
+		visible: { is_unit() }
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_shadow() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: 1
+	
+	critical blur 04:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		z index: -1
+		alignment: center top overflow-shrink
+		visible: { is_unit() }
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_shadow() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: 1
+	
+	##Set Number Outline
+	set number blur 01:
+		left: { set_num_left() }
+		bottom: { set_num_bottom() }
+		width: { set_num_width() }
+		height: { set_num_height() }
+		z index: -1
+		alignment: left top overflow-shrink
+		visible: { has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: -1
+		symbol font:
+			name: vanguard-v-rarity-symbols
+			scale down to: 6
+			size: 7.17
+			alignment: middle center
+	
+	set number blur 02:
+		left: { set_num_left() }
+		bottom: { set_num_bottom() }
+		width: { set_num_width() }
+		height: { set_num_height() }
+		z index: -1
+		alignment: left top overflow-shrink
+		visible: { has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: 1
+		symbol font:
+			name: vanguard-v-rarity-symbols
+			scale down to: 6
+			size: 7.17
+			alignment: middle center
+	
+	set number blur 03:
+		left: { set_num_left() }
+		bottom: { set_num_bottom() }
+		width: { set_num_width() }
+		height: { set_num_height() }
+		z index: -1
+		alignment: left top overflow-shrink
+		visible: { has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: -1
+		symbol font:
+			name: vanguard-v-rarity-symbols
+			scale down to: 6
+			size: 7.17
+			alignment: middle center
+	
+	set number blur 04:
+		left: { set_num_left() }
+		bottom: { set_num_bottom() }
+		width: { set_num_width() }
+		height: { set_num_height() }
+		z index: -1
+		alignment: left top overflow-shrink
+		visible: { has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: 1
+		symbol font:
+			name: vanguard-v-rarity-symbols
+			scale down to: 6
+			size: 7.17
+			alignment: middle center
+	
+	##Illustrator Text Outline
+	illust blur 01:
+		left: { illustrator_left() }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		z index: -1
+		visible: { has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: -1
+	
+	illust blur 02:
+		left: { illustrator_left() }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		z index: -1
+		visible: { has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: -1
+	
+	illust blur 03:
+		left: { illustrator_left() }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		z index: -1
+		visible: { has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: 1
+	
+	illust blur 04:
+		left: { illustrator_left() }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		z index: -1
+		visible: { has_no_bottom() }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { bottom_text_shadow() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: 1
+	
+	
+	
+	

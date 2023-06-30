@@ -1,0 +1,273 @@
+#################### Card Fields ####################
+card field:
+	type: color
+	name: bg_color
+	show statistics: false
+	editable: false
+	default: rgb(255,250,250)
+
+card field:
+	type: image
+	name: image
+	show statistics: false
+	description: The card's image.
+
+card field:
+	type: choice
+	name: type
+	description: The card's type.
+	choice: Normal
+	choice: Trigger
+	choice: G Unit
+	choice: G Guardian
+	choice: Token
+	choice: Normal Order
+	choice: Blitz Order
+	choice: Set Order
+	choice: Set Order/Prison
+	choice: Set Order/World
+	choice: Other
+
+card field:
+	type: choice
+	name: legion
+	choice: none
+	choice: lord
+	choice: mate
+	
+card field:
+	type: choice
+	name: legiondisplay
+	choice: none
+	choice: lord
+	choice: mate
+	editable: false
+	default: card.legion
+	
+card field:
+	type: choice
+	name: nation
+	description: The nation's flag.
+	choice: None
+	choice: United Sanctuary
+	choice: Dragon Empire
+	choice: Dark Zone
+	choice: Magallanica
+	choice: Zoo
+	choice: Star Gate
+	default: nation()
+
+card field:
+	type: choice
+	name: d nation
+	description: The card's Nation in OverDress.
+	choice: None
+	choice: Keter Sanctuary
+	choice: Dragon Empire
+	choice: Dark States
+	choice: Stoicheia
+	choice: Brandt Gate
+	choice: Lyrical Monsaterio
+
+card field:
+	type: text
+	name: name
+	identifying: true
+	show statistics: true
+	description: The card's name.
+	card list visible: true
+	card list column: 0
+
+card field:
+	type: choice
+	name: grade
+	description: The card's grade.
+	choice: 0
+	choice: 1
+	choice: 2
+	choice: 3
+	choice: 4
+	choice: none
+	card list visible: true
+	card list column: 1
+
+card field:
+	type: choice
+	name: skill
+	description: The card's skill attached to the grade.
+	choice: None
+	choice: Boost
+	choice: Intercept
+	choice: Twin Drive
+	choice: Triple Drive
+	default: skill_filter()
+
+card field:
+	type: choice
+	name: Trigger
+	description: The card's Trigger.
+	choice: none
+	choice: Heal
+	choice: Stand
+	choice: Critical
+	choice: Draw
+	choice: Front
+	choice: Over
+
+card field:
+	type: text
+	name: power
+	description: The card's power.
+	card list visible: true
+	card list column: 3
+
+card field:
+	type: text
+	name: critical
+	description: The card's critical.
+	default: "1"
+	card list visible: true
+
+card field:
+	type: text
+	name: clan
+	description: The card's clan.
+	card list visible: true
+	card list column: 4
+	
+card field:
+	type: text
+	name: race
+	description: The card's race.
+	card list visible: true
+	card list column: 5
+
+card field:
+	type: choice
+	name: color
+	description: The nation's color.
+	editable: false
+	choice: United Sanctuary
+	choice: Keter Sanctuary
+	choice: Dragon Empire
+	choice: Dark Zone
+	choice: Dark States
+	choice: Magallanica
+	choice: Zoo
+	choice: Stoicheia
+	choice: Star Gate
+	choice: Brandt Gate
+	choice: Lyrical Monsaterio
+	choice: Cray Elemental
+	default: nation_colour_filter()
+	choice colors cardlist:
+		United Sanctuary			:	rgb(255,218,11)
+		Keter Sanctuary				:	rgb(255,218,11)
+		Dragon Empire				:	rgb(255,36,37)
+		Dark Zone					: 	rgb(101,21,138)
+		Dark States					: 	rgb(101,21,138)
+		Magallanica					:	rgb(0,149,255)
+		Zoo							:	rgb(0,127,14)
+		Stoicheia					:	rgb(0,127,14)
+		Star Gate					:	rgb(140,140,141)
+		Brandt Gate					:	rgb(140,140,141)
+		Lyrical Monsaterio			:	rgb(255,192,203)
+
+card field:
+	type: choice
+	name: shield
+	description: The card's shield.
+	choice: none
+	choice: 5000
+	choice: 10000
+	choice: 15000
+	choice: 20000
+	choice: 30000
+	choice: 50000
+	choice: 0
+	default: { if set.series_automation == "D Series" then d_shield_filter() else if set.series_automation == "V Series" then v_shield_filter() else og_shield_filter() }()
+	card list visible: true
+	card list column: 6
+
+card field:
+	type: choice
+	name: gift
+	description: The card's Imaginary Gift.
+	choice: None
+	choice: Accel
+	choice: Force
+	choice: Protect
+	choice: Persona Ride
+
+card field:
+	type: text
+	name: text
+	multi line: true
+	script: text_filter(input: value, card_name: card.name)
+	description: The card's card effect text.
+
+card field:
+	type: choice
+	name: text_box
+	show statistics: false
+	editable: false
+	choice: default
+	
+card field:
+	type: choice
+	name: text_box_top
+	show statistics: false
+	editable: false
+	choice: default
+
+card field:
+	type: choice
+	name: text_box_bottom
+	show statistics: false
+	editable: false
+	choice: default
+	
+card field:
+	type: choice
+	name: flavor_box
+	show statistics: false
+	editable: false
+	choice: default
+
+card field:
+	type: text
+	name: flavor
+	multi line: true
+	description: The card's flavor text.
+	
+card field:
+	type: text
+	name: illust
+	multi line: false
+	description: The illustrator
+	
+card field:
+	type: text
+	name: set_number
+	multi line: false
+	description: The card number
+	default: { if set.set_code != "" then set.set_code + "/" else "" }()
+
+card field:
+	type: choice
+	name: rarity
+	choice: default
+	choice: Special Vanguard Rare
+	choice: Vanguard Rare
+	choice: Generation Rare
+	choice: Reverse Rare
+	choice: Triple Rare
+	choice: Origin Rare
+	choice: Double Rare
+	choice: Special Print
+	choice: Rare
+	choice: Common
+	choice: Promo
+	choice: none
+	default: card_rarity()
+

@@ -1,0 +1,632 @@
+mse version: 0.3.8
+game: vanguard
+short name:  Vanguard
+full name: Old Style
+icon: icon.png
+position hint: 1
+installer group: Vanguard/Old
+
+version: 2021-04-04.01
+depends on:
+	package: vanguard.mse-game
+	version: 2021-04-04.01
+depends on:
+	package: vanguard-symbols.mse-symbol-font
+	version: 2021-04-04.01
+depends on:
+	package: vanguard-v-symbols.mse-symbol-font
+	version: 2021-04-04.01
+depends on:
+	package: vanguard-v-rarity-symbols.mse-symbol-font
+	version: 2020-08-09.01
+
+card width: 348
+card height: 508
+card dpi: 140
+card background: rgb(200,200,200)
+
+init script:
+	symbol_font := {
+		if styling.v_symbols then "vanguard-v-symbols"
+		else "vanguard-symbols"
+	}
+	
+	special_print_text := {
+		not is_order() and (styling.special_print == "No Unit Border" or styling.special_print == "No Effect Box")
+	}
+	
+	###Ability Text
+	ability_left := { 15 }
+	ability_bottom := { if is_order() then 492 else 420 }
+	ability_width := { 316 }
+	ability_height := { if is_order() then 128 else 165 }
+	ability_color := { if is_order() then rgb(255,255,255) else rgb(0,0,0) }
+	ability_shadow := { if is_order() then rgb(0,0,0) else rgba(255,255,255,255) }
+	ability_alignment := { if is_order() then "top left overflow-shrink" else "bottom left overflow-shrink" }
+	#ability_outline := { 2 }
+
+styling field:
+	type: choice
+	name: special print
+	description: Type of Special Print used.
+	choice: None
+	choice: No Effect Box
+
+styling field:
+	type: boolean
+	name: v symbols
+	description: Use V-Style Symbols
+	initial: false
+
+card style:
+	bg_color:
+		top: 0
+		left: 0
+		height: 508
+		width: 348
+		z index: -6
+		mask: { if is_order() then "bg_color_mask_order.png" else "bg_color_mask.png" }
+
+	type:
+		bottom: 508
+		left: 0
+		height: { if is_order() then 190 else 100 }
+		width: 348
+		z index: -3
+		render style: image
+		choice images:
+			Normal: unit.png
+			Trigger: trigger.png
+			G Unit: unitg.png
+			G Guardian: guardiang.png
+			Normal Order: order.png
+			Blitz Order: order_blitz.png
+			
+	legion:
+		bottom: 508
+		left: 0
+		height: 100
+		width: 50
+		render style: image
+		
+	legiondisplay:
+		bottom: 508
+		left: 0
+		height: 100
+		width: 348
+		render style: image
+		choice images:
+			lord: legionL.png
+			mate: legionR.png
+			
+	nation:
+		right: { if is_order() then 225 else 332 }
+		bottom: { if is_order() then 508 else 479 }
+		width: { if is_order() then 107 else 26 }
+		height: { if is_order() then 18 else 16 }
+		z index: -2
+		render style: image
+		choice images:
+			Zoo: { if is_order() then "Z_order.png" else "flagZoo.png" }
+			United Sanctuary: { if is_order() then "US_order.png" else "flagUS.png" }
+			Dark Zone: { if is_order() then "DZ_order.png" else "flagDZ.png" }
+			Dragon Empire: { if is_order() then "DE_order.png" else "flagDE.png" }
+			Star Gate: { if is_order() then "SG_order.png" else "flagSG.png" }
+			Magallanica: { if is_order() then "M_order.png" else "flagMaga.png" }
+
+	image:
+		top: 0
+		left: 0
+		height: 508
+		width: 348
+		z index: -4
+		mask: { if is_order() then "bg_color_mask_order.png" else "bg_color_mask.png" }
+		default: image_bg.png
+
+	name:
+		top: { if is_order() then 335 else 434 }
+		left: { if is_order() then 52 else 90 }
+		height: 17.478
+		width: { if is_order() then 240 else 205 }
+		alignment: center middle overflow-shrink
+		z index: 0
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: {if is_gunit() then rgb(250,250,250) else rgb(0,0,0)}
+
+	power:
+		top: 455
+		left: 55
+		height: 20
+		width: 75
+		alignment: right overflow-shrink
+		z index: 0
+		visible: { is_unit() and card.type != "G Guardian" }
+		font:
+			name: Impact
+			size: 20
+			style: italic
+			color: rgb(213,204,51)
+
+	grade:
+		top: 5
+		left: 8
+		height: 44
+		width: 38
+		z index: 0
+		render style: image
+		choice images:
+			0: grade0.png
+			1: grade1.png
+			2: grade2.png
+			3: grade3.png
+			4: { if is_gunit() then "grade4G.png" else "grade4.png" }
+	
+	gift:
+		top: 78
+		left: 7
+		height: 46
+		width: 39
+		z index: 0
+		render style: image
+		visible: { is_unit() }
+		choice images:
+			Accel: giftAccel.png
+			Force: giftForce.png
+			Protect: giftProtect.png
+	
+	skill:
+		top: 49
+		left: 12
+		height: 27
+		width: 32
+		z index: 0
+		render style: image
+		visible: { is_unit() }
+		choice images:
+			Boost: boost.png
+			Intercept: intercept.png
+			Twin Drive: twindrive.png
+			Triple Drive: { if is_gunit() then "tripledriveG.png" else "tripledrive.png" }
+
+	Trigger:
+		top: 0
+		right: 348
+		height: 100
+		width: 75
+		z index: -1
+		render style: image
+		visible: {card.type == "Trigger"}
+		choice images:
+			Heal: { if styling.v_symbols then "htrigger_V.png" else "htrigger.png" }
+			Stand: { if styling.v_symbols then "strigger_V.png" else "strigger.png" }
+			Critical: { if styling.v_symbols then "ctrigger_V.png" else "ctrigger.png" }
+			Draw: { if styling.v_symbols then "dtrigger_V.png" else "dtrigger.png" }
+			Front: ftrigger.png
+			
+	shield:
+		top: 110
+		left: 0
+		height: 150
+		width: 55
+		z index: 0
+		render style: image
+		choice images:
+			5000: shield5k.png
+			10000: shield10k.png
+			15000: { if is_gunit() then "shieldG.png" else "shield15k.png" }
+			20000: shield20k.png
+			30000: shield30k.png
+			0: shieldSentinel.png
+			
+	color:
+		top: 458.312
+		left: 193.024
+		height: 15.536
+		width: 115.816
+		z index: -4
+		render style: image
+		choice images:
+			Cray Elemental: CE.png
+			United Sanctuary: US.png
+			Dragon Empire: DE.png
+			Dark Zone: DZ.png
+			Magallanica: M.png
+			Zoo: Z.png
+			Star Gate: SG.png
+
+	clan:
+		top: { if is_order() then 493 else 459 }
+		left: { if is_order() then 121 else 203 }
+		height: { if is_order() then 15 else 15 }
+		width: { if is_order() then 101 else 87.8 }
+		z index: 1
+		alignment: center overflow-shrink
+		font:
+			name: Optima
+			size: 8
+			scale down to: 7.5
+			color: { if card.clan == "Link Joker" then rgb(0,0,0) else rgb(255,255,255) }
+			weight: bold
+			shadow color: { if card.clan == "Link Joker" then rgb(255,0,0) else rgb(0,0,0)  }
+			shadow displacement x: 0
+			shadow displacement y: 0
+			shadow blur: 3
+	
+	race:
+		top: { if is_order() then 480 else 476 }
+		left: { if is_order() then 121 else 200 }
+		height: 10
+		width: { if is_order() then 101 else 92.8 }
+		z index: 2
+		alignment: center overflow-shrink
+		font:
+			name: Optima-Thin
+			size: 12
+			scale down to: 8
+			color: rgb(255,255,255)
+			weight: bold
+			shadow color: rgb(0,0,0)
+			shadow displacement x: 0
+			shadow displacement y: 0
+			shadow blur: 2
+	
+	text:
+		bottom: { ability_bottom() }
+		left: { ability_left() }
+		height: { ability_height() }
+		width: { ability_width() }
+		z index: 0
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		font:
+			name: Optima
+			size: 8.5
+			#weight: bold
+			scale down to: 5
+			color: { ability_color() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: 0
+			shadow displacement y: 0
+		symbol font:
+			name: { symbol_font() }
+			scale down to: 5
+			size: 12
+			alignment: middle center
+
+	text_box:
+		bottom: 420
+		left: 10
+		height: 
+			script: card_style.text.content_height ###length(to_text(card.text))
+		width: 325
+		z index: -1
+		visible: { card.text != "" and not special_print_text() and not is_order() }
+		render style: image
+		choice images:
+			default: text_bg.png
+			
+	text_box_top:
+		bottom:
+			script: 420 - card_style.text.content_height
+			#script: card_style.text_box.bottom - card_style.text_box.height
+		left: 10
+		height: 9
+		width: 325
+		z index: -1
+		visible: { card.text != "" and not special_print_text() and not is_order() }
+		render style: image
+		choice images:
+			default: text_bg_top.png
+			
+	text_box_bottom:
+		top:
+			script: card_style.text_box.bottom
+		left: 15
+		height: 6
+		width: 314.23
+		z index: -1
+		visible: { card.text != "" and not special_print_text() and not is_order() }
+		render style: image
+		choice images:
+			default: text_bg_bottom.png
+			
+	flavor_box:
+		bottom:
+			script: 
+				if is_order() then 315
+				else if (card.text == "") then card_style.text.bottom - card_style.text.content_height
+				else card_style.text.bottom - card_style.text.content_height - 19
+			###script: card_style.flavor.bottom ### 278.4
+		left:
+			script: (348 - card_style.flavor.content_width) / 2 - 12 ### 20
+		height: { card_style.flavor.content_height + 2 }
+		width: 
+			script: card_style.flavor.content_width + 20
+		z index: -1
+		visible: { not special_print_text() and card.flavor != "" }
+		render style: image
+		choice images:
+			default: flavor_bg.png
+	
+	flavor:
+		bottom:
+			script: card_style.text.bottom - card_style.text.content_height - 20 ###278.4
+				if is_order() then 315
+				else if (card.text =="") then card_style.text.bottom - card_style.text.content_height
+				else card_style.text.bottom - card_style.text.content_height - 20
+		left: 20
+		height: 30
+		width: 304.23
+		z index: 0
+		alignment: bottom center overflow-shrink
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { not special_print_text() }
+		font:
+			name: MatrixBook
+			size: 9
+			weight: bold
+			scale down to: 6
+			color: rgb(255,255,255)
+		symbol font:
+			name: vanguard-symbols
+			scale down to: 1
+			size: 13
+			
+	illust:
+		bottom: 515
+		left: 258
+		height: 20
+		width: 80
+		alignment: right top overflow-shrink
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { if is_trigger() then rgb(0,0,0) else rgb(255,255,255) }
+			
+	set_number:
+		left: { if is_order() then 20 else 25 }
+		bottom: 515
+		height: 20
+		width: 80
+		alignment: left top overflow-shrink
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { if is_trigger() then rgb(0,0,0) else rgb(255,255,255) }
+		symbol font:
+			name: { if styling.v_symbols then "vanguard-v-rarity-symbols" else "" }
+			scale down to: 6
+			size: 7.17
+			alignment: middle center
+
+##Extra Card Fields
+extra card field:
+	type: text
+	name: illustrator text
+	default: "ILLUST/"
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+extra card field:
+	type: choice
+	name: flag border
+	default: card.type
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+extra card field:
+	type: image
+	name: order border
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+##Text Outline for Ability
+extra card field:
+	type: text
+	name: ability 1 blur 01
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: ability 1 blur 02
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: ability 1 blur 03
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: ability 1 blur 04
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+
+
+##Style
+extra card style:
+	##Order Border
+	order border:
+		top: 0
+		left: 0
+		height: 330
+		width: 348
+		z index: -5
+		visible: { is_order() }
+		default: order_border.png
+
+	##Illustrator Text
+	illustrator text:
+		bottom: 515
+		left: { 258 - card_style.illust.content_width }
+		height: 20
+		width: 80
+		alignment: right top overflow-shrink
+		visible: { card.illust != "" }
+		font:
+			name: MS Gothic
+			size: 7.17
+			scale down to: 6
+			color: { if is_trigger() then rgb(0,0,0) else rgb(255,255,255) }
+	
+	##Flag Border
+	flag border:
+		bottom: 483
+		right: 335
+		height: 24
+		width: 31
+		z index: -3
+		render style: image
+		visible: { card.nation != "None" }
+		choice images:
+			Normal: flagBorder.png
+			Trigger: flagBorder.png
+			G Unit: flagBorderG.png
+			G Guardian: flagBorderG.png
+	
+	##Ability Text Outline
+	ability 1 blur 01:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { special_print_text() }
+		font:
+			name: Optima
+			size: 8.5
+			#weight: bold
+			scale down to: 5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: -1
+		symbol font:
+			name: { symbol_font() }
+			scale down to: 5
+			size: 12
+			alignment: middle center
+	
+	ability 1 blur 02:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { special_print_text() }
+		font:
+			name: Optima
+			size: 8.5
+			#weight: bold
+			scale down to: 5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: -1
+		symbol font:
+			name: { symbol_font() }
+			scale down to: 5
+			size: 12
+			alignment: middle center
+	
+	ability 1 blur 03:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { special_print_text() }
+		font:
+			name: Optima
+			size: 8.5
+			#weight: bold
+			scale down to: 5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: 1
+		symbol font:
+			name: { symbol_font() }
+			scale down to: 5
+			size: 12
+			alignment: middle center
+	
+	ability 1 blur 04:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { special_print_text() }
+		font:
+			name: Optima
+			size: 8.5
+			#weight: bold
+			scale down to: 5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: 1
+		symbol font:
+			name: { symbol_font() }
+			scale down to: 5
+			size: 12
+			alignment: middle center

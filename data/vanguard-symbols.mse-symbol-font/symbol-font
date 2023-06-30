@@ -1,0 +1,252 @@
+﻿mse version: 0.3.8
+version: 2021-04-05.01
+short name:  Text Symbols
+full name: Old Text Symbols
+position hint: 1
+installer group: Vanguard/Old/Text Symbols
+
+#image font size: 125
+#horizontal space: 2
+
+symbol:
+	code: F1
+	image: { outline_image(img: "gb1") }
+	image font size: 40
+symbol:
+	code: F2
+	image: { outline_image(img: "gb2") }
+	image font size: 40
+symbol:
+	code: F3
+	image: { outline_image(img: "gb3") }
+	image font size: 40
+symbol:
+	code: F4
+	image: { outline_image(img: "gb4") }
+	image font size: 40
+symbol:
+	code: F8
+	image: { outline_image(img: "gb8") }
+	image font size: 40
+symbol:
+	code: FX
+	image: { outline_image(img: "stride") }
+	image font size: 30
+symbol:
+	code: FG
+	image: { outline_image(img: "GGuardianIcon") }
+	image font size: 33
+symbol:
+	code: FH
+	image: { outline_image(img: "heal") }
+	image font size: 14
+symbol:
+	code: FC
+	image: { if is_white_text() then "crit_order.png" else outline_image(img: "crit") }
+	image font size: 30
+symbol:
+	code: LB3
+	image: { outline_image(img: "LB3Icon") }
+	image font size: 26
+symbol:
+	code: LB4
+	image: { outline_image(img: "LB4Icon") }
+	image font size: 26
+symbol:
+	code: LB5
+	image: { outline_image(img: "LB5Icon") }
+	image font size: 26
+symbol:
+	code: L/G
+	image: { outline_image(img: "LegionIcon") }
+	image font size: 28
+symbol:
+	code: L/20kG
+	image: { outline_image(img: "Legion20k") }
+	image font size: 17
+symbol:
+	code: L/21kG
+	image: { outline_image(img: "Legion21k") }
+	image font size: 17
+symbol:
+	code: L/22kG
+	image: { outline_image(img: "Legion22k") }
+	image font size: 17
+symbol:
+	code: C
+	image: counterblast.png
+	image font size: 31
+symbol:
+	code: O
+	image: soulblast.png
+	image font size: 34
+symbol:
+	code: H
+	image: soulcharge.png
+	draw text: 0
+	image font size: 34
+symbol:
+	code: J
+	image: countercharge.png
+	image font size: 15
+symbol:
+	code: C
+	image: { outline_image(img: "counterblast") }
+	image font size: 44
+symbol:
+	code: O
+	image: { outline_image(img: "soulblast") }
+	image font size: 44
+symbol:
+	code: H
+	image: { outline_image(img: "soulcharge") }
+	draw text: 0
+	image font size: 44
+symbol:
+	code: J
+	image: { outline_image(img: "countercharge") }
+	image font size: 44
+symbol:
+	code: S
+	image: { outline_image(img: "stand") }
+	image font size: 18
+symbol:
+	code: E
+	image: { outline_image(img: "rest") }
+	image font size: 18
+symbol:
+	code: P
+	image: { if is_white_text() then "power_order.png" else outline_image(img: "power") }
+	image font size: 30
+symbol:
+	code: LD
+	image: { if is_white_text() then "shield_order.png" else outline_image(img: "shield") }
+	image font size: 29
+symbol:
+	code: LOPT
+	image: { outline_image(img: "opt") }
+	image font size: 13
+symbol:
+	code: G
+	image: { outline_image(img: "guardian") }
+	image font size: 26
+symbol:
+	code: R
+	image: { outline_image(img: "rearguard") }
+	image font size: 17
+symbol:
+	code: V
+	image: { outline_image(img: "vanguard") }
+	image font size: 17
+symbol:
+	code: B
+	image: { outline_image(img: "boost") }
+	image font size: 16
+symbol:
+	code: I
+	image: { outline_image(img: "intercept") }
+	image font size: 16
+symbol:
+	code: T
+	image: { outline_image(img: "twindrive") }
+	image font size: 16
+symbol:
+	code: LT3
+	image: { outline_image(img: "tripledrive") }
+	image font size: 16
+symbol:
+	code: A/T
+	image: { outline_image(img: "act") }
+	image font size: 13
+symbol:
+	code: N/A
+	image: { outline_image(img: "auto") }
+	image font size: 13
+symbol:
+	code: N/T
+	image: { outline_image(img: "cont") }
+	image font size: 13
+symbol:
+	code: A/N
+	image: { outline_image(img: "imm") }
+	image font size: 13
+symbol:
+	code: AJKQ
+	image: { outline_image(img: "RoyalFlush") }
+	image font size: 25
+	
+symbol:
+	image: { if is_white_text() then "mana_circle_order.png" else outline_image(img: "mana_circle_order.png") }
+	code: [0-9]+
+	regex: yes
+	draw text: 0
+	text margin left:   .2
+	text margin right:  .2
+	text margin top:    -.14
+	text margin bottom: -.14
+	image font size: 165
+	text font:
+		name: Optima Bold
+		size: 1
+		color: { if is_order() then rgb(255,255,255) else rgb(255,255,255) }
+		max stretch: 0.57
+
+insert symbol menu:
+	item: C
+	item: O
+	item: H
+	item: J
+	item:
+		type: custom
+		name: number
+	item: S
+	item: E
+	item: P
+	item: FC
+	item: LD
+	item: A/T
+	item: N/A
+	item: O
+	item: N/T
+	item: A/N
+	item: LOPT
+	item:
+		name: Circles
+		item: G
+		item: R
+		item: V
+	item:
+		name: Skill Icons
+		item: B
+		item: I
+		item: T
+		item: LT3
+	item:
+		name: Trigger Icons
+		item: FH
+		item: FCT
+		item: FDR
+		item: FST
+		item: FFT
+	item:
+		name: Special
+		item:
+			name: Stride
+			item: FX
+			item: F1
+			item: F2
+			item: F3
+			item: F4
+			item: F8
+			item: FG
+		item:
+			name: Limit Break
+			item: LB4
+			item: LB5
+		item:
+			name: Legion
+			item: L/G
+			item: L/20kG
+			item: L/21kG
+			item: L/22kG
+		item: AJKQ

@@ -1,0 +1,174 @@
+﻿mse version: 2.0.0
+game: LoR
+short name: Tooltip
+installer group: Legends of Runeterra/normal style
+icon: card-sample.png
+position hint: 10
+
+version: 2022-02-14
+depends on:
+	package: LoR.mse-game
+	version: 2022-02-14
+depends on:
+	package: lor-symbol.mse-symbol-font
+	version: 2022-02-14
+
+card width: 524
+card height: 373
+card dpi: 150
+
+############################################################## Extra scripts
+init script:
+	text_lines := { min(5, max(1, card_style.ability.content_height div 35)) }
+
+############################################################## Extra style options
+styling field:
+	type: boolean
+	name: use ability text
+	description: Toggles the visibility of the reminder text.
+	initial: true
+styling field:
+	type: text
+	name: set title font size
+	description: Sets the font size of the keyword's name. Leave blank to default to 30.
+styling field:
+	type: text
+	name: set text font size
+	description: Sets the font size of the keyword's reminder text. Leave blank to default to 23.
+styling field:
+	type: boolean
+	name: use image background
+	description: Determines whether to use a block colour background an image input background.
+	initial: no
+############################################################## Card fields
+card style:
+	background:
+		left:	0
+		top:	0
+		width:	524
+		height:	373
+		z index: 1
+		render style: image
+		choice images:
+			normal: 
+				script:
+					t := ""
+					if card.tail != "Tail" then t := "notail"
+					if styling.use_ability_text then "/LoR.mse-game/frame/tooltip/frame" + to_string(text_lines()) + t + ".png"
+					else "/LoR.mse-game/frame/tooltipframe0.png"
+	truebackground:
+		left: { if styling.use_image_background then 10000 else 0 }
+		top:	0
+		width:	524
+		height:	373
+		z index: -6
+	backgroundimage:
+		left: { if styling.use_image_background then 0 else 1000 }
+		top:	0
+		width:	524
+		height:	373
+		z index: -5
+	name:
+		left:
+			script:
+				x := 292 - max(200, card_style.name.content_width+30)/2
+				if card.keysymbolreal == "Blank" then x - 30 else x
+		bottom: { if styling.use_ability_text then 205 - text_lines() * 20 else 205 }
+		width: { max(200, card_style.name.content_width+30) }
+		height: 60
+		alignment: center middle
+		padding left:   4
+		padding top:    2
+		padding right:  4
+		padding bottom: 2
+		line height soft: 0.75
+		z index: 3
+		font:
+			name: { if set.Grouping_Font == "" then "Univers LT Std 59 UltraCn" else set.Grouping_Font }
+			size: { if styling.set_title_font_size == "" then 30 else to_number(styling.set_title_font_size) }
+			color: { rgb(247, 225, 161) }
+	keysymbolreal:
+		left: { 232 - card_style.name.content_width/2 }
+		bottom: { if styling.use_ability_text then 205 - text_lines() * 20 else 205 }
+		width:	60
+		height:	60
+		z index: 4
+		render style: image
+		choice images:
+			Spell Burst: /LoR.mse-game/keywords/box/burst.png
+			Spell Focus: /LoR.mse-game/keywords/box/focus.png
+			Spell Fast: /LoR.mse-game/keywords/box/fast.png
+			Spell Slow: /LoR.mse-game/keywords/box/slow.png
+			Spell Skill: /LoR.mse-game/keywords/box/skill.png
+			Standard Attach: /LoR.mse-game/keywords/box/attach.png
+			Standard Attune: /LoR.mse-game/keywords/box/attune.png
+			Standard Augment: /LoR.mse-game/keywords/box/augment.png
+			Standard Barrier: /LoR.mse-game/keywords/box/barrier.png
+			Standard Can't Attack: /LoR.mse-game/keywords/box/cantattack.png
+			Standard Can't Block: /LoR.mse-game/keywords/box/cantblock.png
+			Standard Challenger: /LoR.mse-game/keywords/box/challenger.png
+			Standard Deep: /LoR.mse-game/keywords/box/deep.png
+			Standard Double Attack: /LoR.mse-game/keywords/box/doubleattack.png
+			Standard Ephemeral: /LoR.mse-game/keywords/box/ephemeral.png
+			Standard Elusive: /LoR.mse-game/keywords/box/elusive.png
+			Standard Evolve: /LoR.mse-game/keywords/box/evolve.png
+			Standard Fated: /LoR.mse-game/keywords/box/fated.png
+			Standard Fearsome: /LoR.mse-game/keywords/box/fearsome.png
+			Standard Fleeting: /LoR.mse-game/keywords/box/fleeting.png
+			Standard Formidable: /LoR.mse-game/keywords/box/formidable.png
+			Standard Fury: /LoR.mse-game/keywords/box/fury.png
+			Standard Hallowed: /LoR.mse-game/keywords/box/hallowed.png
+			Standard Impact: /LoR.mse-game/keywords/box/impact.png
+			Standard Lifesteal: /LoR.mse-game/keywords/box/lifesteal.png
+			Standard Lurk: /LoR.mse-game/keywords/box/lurk.png
+			Standard Overwhelm: /LoR.mse-game/keywords/box/overwhelm.png
+			Standard Quick Attack: /LoR.mse-game/keywords/box/quickattack.png
+			Standard Regeneration: /LoR.mse-game/keywords/box/regeneration.png
+			Standard Scout: /LoR.mse-game/keywords/box/scout.png
+			Standard SpellShield: /LoR.mse-game/keywords/box/spellshield.png
+			Standard Tough: /LoR.mse-game/keywords/box/tough.png
+			Standard Vulnerable: /LoR.mse-game/keywords/box/vulnerable.png
+			Custom Symbol 1: { if set.Custom_Symbol_1 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_1 }
+			Custom Symbol 2: { if set.Custom_Symbol_2 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_2 }
+			Custom Symbol 3: { if set.Custom_Symbol_3 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_3 }
+			Custom Symbol 4: { if set.Custom_Symbol_4 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_4 }
+			Custom Symbol 5: { if set.Custom_Symbol_5 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_5 }
+			Custom Symbol 6: { if set.Custom_Symbol_6 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_6 }
+			Custom Symbol 7: { if set.Custom_Symbol_7 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_7 }
+			Custom Symbol 8: { if set.Custom_Symbol_8 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_8 }
+			Custom Symbol 9: { if set.Custom_Symbol_9 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_9 }
+			Custom Symbol 10: { if set.Custom_Symbol_10 != "" then "/LoR.mse-game/custom/" + set.Custom_Symbol_10 }
+			Landmark: /LoR.mse-game/keywords/box/landmark.png
+	ability:
+		left: 60
+		bottom: { 211 + text_lines() * 20 }
+		width: 404
+		height: { text_lines() * 40 }
+		font:
+			name: { if set.Text_Font == "" then "Beaufort for LOL" else set.Text_Font }
+			size: { if styling.set_text_font_size == "" then 23 else to_number(styling.set_text_font_size) }
+			color: { set.Ability_Color }
+		symbol font:
+			name: lor-symbol.mse-symbol-font
+			size: { if styling.set_text_font_size == "" then 23 else to_number(styling.set_text_font_size) }
+		visible:
+			script: styling.use_ability_text
+		alignment: center top shrink-overflow
+		z index: 2
+		padding left:   4
+		padding top:    2
+		padding right:  4
+		padding bottom: 2
+		line height hard: 1.2
+		line height line: 1.5
+	tail:
+		left: 237
+		top: { if styling.use_ability_text then 211 + text_lines() * 20 else 211 }
+		width:	45
+		height:	60
+		z index: 2
+		render style: hidden
+		visible: true
+		choice images:
+			Tail: { built_in_image("bool_yes") }
+			No tail: { built_in_image("bool_no") }

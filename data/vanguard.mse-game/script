@@ -1,0 +1,384 @@
+﻿############################################################## Scripts
+	is_unit := {
+		not is_order() and card.type != "Other"
+	}
+	
+	is_gunit := {
+		card.type=="G Unit" or
+		card.type=="G Guardian"
+	}
+	
+	is_trigger := {
+		card.type=="Trigger"
+	}
+	
+	is_order := {
+		card.type=="Normal Order" or card.type=="Blitz Order" or card.type=="Set Order" or card.type=="Set Order/Prison" or card.type=="Set Order/World"
+	}
+	
+	is_white_text := {
+		is_order()
+	}
+	
+	nation :={
+		if (card.clan == "United Sanctuary" or card.clan == "Genesis" or card.clan == "Oracle Think Tank" or card.clan == "Royal Paladin" or card.clan == "Shadow Paladin" or card.clan == "Gold Paladin" or card.clan == "Angel Feather") then "United Sanctuary"
+		else if (card.clan == "Dragon Empire" or card.clan == "Kagero" or card.clan == "Murakumo" or card.clan == "Nubatama" or card.clan == "Tachikaze" or card.clan == "Narukami") then "Dragon Empire"
+		else if (card.clan == "Star Gate" or card.clan == "Link Joker" or card.clan == "Dimension Police" or card.clan == "Nova Grappler" or card.clan == "Etranger" or card.clan == "Union Verse" or card.clan == "Raidech") then "Star Gate"
+		else if (card.clan == "Dark Zone" or card.clan == "Dark Irregulars" or card.clan == "Pale Moon" or card.clan == "Spike Brothers" or card.clan == "Gear Chronicle" or card.clan == "Empty Heart") then "Dark Zone"
+		else if (card.clan == "Magallanica" or card.clan == "Aqua Force" or card.clan == "Bermuda Triangle" or card.clan == "Granblue" or card.clan == "Ocean Route") then "Magallanica"
+		else if (card.clan == "Zoo" or card.clan == "Neo Nectar" or card.clan == "Megacolony" or card.clan == "Great Nature" or card.clan == "Soaring Eye") then "Zoo"
+		else "None"
+	}
+	
+	nation_colour_filter := {
+		if card.clan == "Cray Elemental" and card.nation == "None" then "Cray Elemental"
+		else if card.nation != "None" then card.nation
+		else card.d_nation
+	}
+	
+	d_nation :={
+		if (card.clan == "Keter Sanctuary" or card.clan == "United Sanctuary" or card.clan == "Genesis" or card.clan == "Oracle Think Tank" or card.clan == "Royal Paladin" or card.clan == "Shadow Paladin" or card.clan == "Gold Paladin" or card.clan == "Angel Feather" or card.clan == "Soaring Eye") then "Keter Sanctuary"
+		else if (card.clan == "Dragon Empire" or card.clan == "Kagero" or card.clan == "Murakumo" or card.clan == "Nubatama" or card.clan == "Tachikaze" or card.clan == "Narukami") then "Dragon Empire"
+		else if (card.clan == "Brandt Gate" or card.clan == "Star Gate" or card.clan == "Link Joker" or card.clan == "Dimension Police" or card.clan == "Nova Grappler" or card.clan == "Etranger" or card.clan == "Union Verse" or card.clan == "Raidech") then "Brandt Gate"
+		else if (card.clan == "Magallanica" or card.clan == "Aqua Force" or card.clan == "Granblue" or card.clan == "Ocean Route" or card.clan == "Zoo" or card.clan == "Neo Nectar" or card.clan == "Megacolony" or card.clan == "Great Nature") then "Stoicheia"
+		else if (card.clan == "Lyrical Monsaterio" or card.clan == "Bermuda Triangle") then "Lyrical Monsaterio"
+		else "None"
+	}
+	
+	has_no_bottom := {
+		styling.special_print == "No Unit Border" or card.type == "Token" or card.type == "Other"
+	}
+	
+	special_print_text := {
+		styling.special_print == "No Effect Box" or has_no_bottom()
+	}
+	
+	outline_image := {
+		if special_print_text() then img + "_outline.png" else img + ".png"
+	}
+	
+	marker_filter :={
+		card.gift
+	}
+	
+	joker_filter := {
+		if card.clan == "Link Joker" then rgb(0,0,0) else rgb(255,255,255)
+	}
+	
+	special_filter := {
+		rarity := card.rarity
+		if (chosen(choice:"Special Vanguard Rare", rarity) or chosen(choice:"Special Print", rarity)) then "Special"
+		else "None"
+	}
+	
+	skill_filter :={
+		grade := card.grade
+		if is_order() or card.type=="G Guardian" then "None"
+		else if card.type=="G Unit" then "Triple Drive"
+		else if (chosen(choice:"0", grade) or chosen(choice:"1", grade)) then "Boost"
+		else if chosen(choice:"2", grade) then "Intercept"
+		else if (chosen(choice:"3", grade) or chosen(choice:"4", grade)) then "Twin Drive"
+		else "None"
+	}
+	
+	og_shield_filter := {
+		grade := card.grade
+		Trigger := card.Trigger
+		if is_order() then "none"
+		else if (chosen(choice:"0", grade) and not chosen(choice:"Draw", Trigger)) then "10000"
+		else if (chosen(choice:"1", grade) or chosen(choice:"2", grade) or chosen(choice:"Draw", Trigger)) then "5000"
+		else if chosen(choice:"G Guardian", card.type) then "15000"
+		else "none"
+	}
+
+	v_shield_filter := {
+		grade := card.grade
+		Trigger := card.Trigger
+		if is_order() then "none"
+		else if (chosen(choice:"Heal", Trigger)) then "20000"
+		else if (chosen(choice:"0", grade) and not chosen(choice:"Trigger",card.type)) or chosen(choice:"1", grade) then "10000"
+		else if (chosen(choice:"0", grade) and not chosen(choice:"Draw", Trigger)) then "15000"
+		else if (chosen(choice:"1", grade) or chosen(choice:"2", grade) or chosen(choice:"Draw", Trigger)) then "5000"
+		else if chosen(choice:"G Guardian", card.type) then "15000"
+		else "none"
+	}
+	
+	d_shield_filter := {
+		grade := card.grade
+		Trigger := card.Trigger
+		if is_order() then "None"
+		else if (grade != "3" and grade != "4") then "5000"
+		else if (chosen(choice:"Trigger", card.type) and chosen(choice:"Over", Trigger)) then "50000"
+		else if (chosen(choice:"Trigger", card.type) and not chosen(choice:"Draw", Trigger)) then "15000"
+		else if chosen(choice:"G Guardian", card.type) then "15000"
+		else "none"
+	}
+	
+	card_rarity := {
+		setNo := card.set_number
+		rarity := substring(setNo,begin:length(setNo) - 9)
+		if (contains(rarity,match:"SVR")) then "Special Vanguard Rare"
+		else if (contains(rarity,match:"VR")) then "Vanguard Rare"
+		else if (contains(rarity,match:"OR")) then "Origin Rare"
+		else if (contains(rarity,match:"RRR")) then "Triple Rare"
+		else if (contains(rarity,match:"RR")) then "Double Rare"
+		else if (contains(rarity,match:"ЯЯЯ")) then "Reverse Rare"
+		else if (contains(rarity,match:"GR")) then "Generation Rare"
+		else if (contains(rarity,match:"PR")) then "Promo"
+		else if (contains(rarity,match:"R")) then "Rare"
+		else if (contains(rarity,match:"C")) then "Common"
+		else if (contains(rarity,match:"PR")) then "Promo"
+		else if (contains(rarity,match:"SP")) then "Special Print"
+		else "none"
+	}
+
+	expand_keywords@(
+		condition: {
+			correct_case
+		}
+		default_expand: {
+			chosen(choice:if correct_case then mode else "lower case", set.automatic_reminder_text)
+		},
+		combine: {
+			keyword  := "<nospellcheck>{keyword}</nospellcheck>"
+			reminder := process_english_hints(reminder)
+			keyword + if expand then "<atom-reminder-{mode}> ({reminder})</atom-reminder-{mode}>"
+		}) 
+		
+	text_filter :=
+		# step 1 : remove all automatic tags
+		remove_tag@(tag: "<sym-auto>") +
+		remove_tag@(tag: "<i-auto>")   +
+		remove_tag@(tag: "<b-auto>")   +
+		remove_tag@(tag: "<error-spelling") +
+		remove_tag@(tag: "<nospellcheck>") +
+		# step 2 : reminder text for keywords
+		expand_keywords@(
+			condition: {
+				correct_case or (mode != "pseudo" and not used_placeholders)
+			}
+			default_expand: {
+				chosen(choice:if correct_case then mode else "lower case", set.automatic_reminder_text)
+			},
+			combine: {
+				keyword  := "<nospellcheck>{keyword}</nospellcheck>"
+				reminder := process_english_hints(reminder)
+				if mode == "pseudo" then "<i-auto>{keyword}</i-auto>"
+				else keyword + if expand then "<atom-reminder-{mode}> ({reminder})</atom-reminder-{mode}>"
+			}) +
+		# step 2b : move action keywords' reminder text to the end of the line
+		replace@(
+			match: "(<atom-reminder-action>(?:(?!<kw-).)*</atom-reminder-action></kw[^>]*>)(((?!<atom-reminder| ?<kw-)[^\n(])+)",
+			replace: "\\2\\1"
+			) +
+		# step 2c : remove duplicate reminder text
+		replace@(
+			match: "(<atom-reminder-[^>]*>[^)]+[)]</atom-reminder-[^>]*>)([^\n]+)\\1"
+			replace: "\\2\\1"
+			) +
+		# step 3a : expand shortcut word CARDNAME
+		replace@(
+			match: "CARDNAME",
+			in_context: "(^|[[:space:]]|\\()<match>", # TODO: Allow any punctuation before
+			replace: "<atom-cardname></atom-cardname>"
+			) +
+		# step 3b : expand shortcut word LEGENDNAME
+		replace@(
+			match: "LEGENDNAME",
+			in_context: "(^|[[:space:]]|\\()<match>", # TODO: Allow any punctuation before
+			replace: "<atom-legname></atom-legname>"
+			) +
+		# step 3c : fill in atom fields
+		tag_contents@(
+			tag: "<atom-cardname>",
+			contents: { "<nospellcheck>" + (if card_name=="" then "CARDNAME" else card_name) + "</nospellcheck>" }
+			) +
+		tag_contents@(
+			tag: "<atom-legname>",
+			contents: { "<nospellcheck>" + (if card_name=="" then "LEGENDNAME" else legend_filter(card_name)) + "</nospellcheck>" }
+			) +
+		# step 7 : italicize text in parenthesis
+		#replace@(
+		#	match: "[(]([^)\n]|[(][^)\n]*[)])*[)]?",
+		#	in_context: "(^|[[:space:]])<match>|<atom-keyword><match></",
+		#	replace: "<i-auto>&</i-auto>") +
+		# step 8 : automatic capitalization, but not after "("
+		replace@(
+			match: "([ ]*: |—| — )" # preceded by this
+				+ "([[:lower:]])" # match this
+				+ "(?![)])",      # not followed by this
+			replace: { _1 + to_upper(_2) }
+		) +
+		# step 9 : Colour legion name
+		replace@(
+			match: ">>"
+			replace: "»"
+		)+
+		replace@(
+			match: "\<\<"
+			replace: "«"
+		)+
+		replace@(
+			match: "L/20kG \"",
+			replace: "L/20kG <color:rgb(255,0,0)>\"") +
+		# step 10 : Colour granted effects
+		replace@(
+			match: "\\\{",
+			replace: "<color:rgb(255,0,0)>"
+		)+
+		replace@(
+			match: "\\\}"
+			replace: "</color>"
+		)+
+		# step 11 : Convert VC, RC, and GC
+		replace@(
+			match: "VC"
+			replace: "<sym>V</sym>"
+		)+
+		replace@(
+			match: "RC"
+			replace: "<sym>R</sym>"
+		)+
+		replace@(
+			match: "GC"
+			replace: "<sym>G</sym>"
+		)+
+		# Step 12: Convert Counterblast, Soulblast
+		replace@(
+			match: "CB([0-9]+) "
+			replace: "<sym>Cc\\1</sym>"
+		)+
+		replace@(
+			match: "SB([0-9]+) "
+			replace: "<sym>Os\\1</sym>"
+		)+
+		replace@(
+			match: "CC([0-9]+) "
+			replace: "<sym>Jc\\1</sym>"
+		)+
+		replace@(
+			match: "SC([0-9]+) "
+			replace: "<sym>Hs\\1</sym>"
+		)+
+		# Step 13: Convert Power, SLD, AUTO, CONT, ACT
+		replace@(
+			match: "POW"
+			replace: "<sym>P</sym>"
+		)+
+		replace@(
+			match: "SLD"
+			replace: "<sym>LD</sym>"
+		)+
+		replace@(
+			match: "AUTO"
+			replace: "<sym>N/A</sym>"
+		)+
+		replace@(
+			match: "CONT"
+			replace: "<sym>N/T</sym>"
+		)+
+		replace@(
+			match: "ACT"
+			replace: "<sym>A/T</sym>"
+		)+
+		replace@(
+			match: "REST"
+			replace: "<sym>E</sym>"
+		)+
+		replace@(
+			match: "STAND"
+			replace: "<sym>S</sym>"
+		)+
+		replace@(
+			match: "1/TURN"
+			replace: "<sym>LOPT</sym>"
+		)+
+		replace@(
+			match: "BOOST"
+			replace: "<sym>B</sym>"
+		)+
+		replace@(
+			match: "INTER"
+			replace: "<sym>I</sym>"
+		)+
+		replace@(
+			match: "TWIN"
+			replace: "<sym>T</sym>"
+		)+
+		replace@(
+			match: "TRIPLE"
+			replace: "<sym>LT3</sym>"
+		)+
+		replace@(
+			match: "CRIT"
+			replace: "<sym>FC</sym>"
+		)+
+		replace@(
+			match: "#"
+			replace: "<sym>"
+		)+
+		replace@(
+			match: "`"
+			replace: "</sym>"
+		)+
+		# Step 14: Legion, Generation, and Limit Break
+		replace@(
+			match: "LEGION"
+			replace: "<sym>L/G</sym>"
+		)+
+		replace@(
+			match: "LG20K"
+			replace: "<sym>L/20kG</sym>"
+		)+
+		replace@(
+			match: "LG21K"
+			replace: "<sym>L/21kG</sym>"
+		)+
+		replace@(
+			match: "LG22K"
+			replace: "<sym>L/22kG</sym>"
+		)+
+		replace@(
+			match: "STRIDE"
+			replace: "<sym>FX</sym>"
+		)+
+		replace@(
+			match: "GB1"
+			replace: "<sym>F1</sym>"
+		)+
+		replace@(
+			match: "GB2"
+			replace: "<sym>F2</sym>"
+		)+
+		replace@(
+			match: "GB3"
+			replace: "<sym>F3</sym>"
+		)+
+		replace@(
+			match: "GGUARD"
+			replace: "<sym>FG</sym>"
+		)+
+		replace@(
+			match: "LB4"
+			replace: "<sym>LB4</sym>"
+		)+
+		replace@(
+			match: "LB5"
+			replace: "<sym>LB5</sym>"
+		)+
+		replace@(
+			match: "c_"
+			replace: "【"
+		)+
+		replace@(
+			match: "_c"
+			replace: "】"
+		)+
+		replace@(
+			match: "IMM"
+			replace: "<sym>A/N</sym>"
+		)+
+		replace@(
+			match: "ROYAL"
+			replace: "<sym>AJKQ</sym>"
+		)

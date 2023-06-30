@@ -1,0 +1,1745 @@
+﻿mse version: 2.0.0
+short name: LoR
+full name: Legends of Runeterra
+installer group: Legends of Runeterra/game files
+icon: card-sample.png
+position hint: 03
+
+version: 2022-09-05
+
+# Author : kino
+# Most stuff is copy/pasted from magic.mse-game (and vanguard.mse-game! thanks Wolfwood)
+############################################################## Functions & filters
+# General functions
+init script:
+	
+	############################################################## The text box
+	
+	potential_space := { if set.add_space_after_color_code then " " else "​" }
+	
+	text_filter := 
+		replace@(
+			match: "(\\[.+?\\])",
+		 	replace: { "<color:rgb(250, 214, 90)>" + substring(input, begin:1, end:length(input) - 1) + "</color>" + potential_space() }) +
+		replace@(
+		 	match: "(\\\{.+?\\\})",
+		 	replace: { "<color:rgb(73, 160, 248)>" + substring(input, begin:1, end:length(input) - 1) + "</color>" + potential_space() }) +
+		replace@(
+			match: "(\\(.\\))",
+		 	replace: { "<sym>" + substring(input, begin:1, end:length(input) - 1) + "</sym>" }) +
+		replace@(
+		 	match: "(\\*.+?\\*)",
+		 	replace: { remove_tag(tag: "<color:rgb(250, 214, 90)>", remove_tag(tag: "<color:rgb(73, 160, 248)>", remove_tag(tag: "</color>", substring(input, begin:1, end:length(input) - 1)))) })
+
+	template_type := {
+		if substring(stylesheet.short_name, end:8) == "Champion" then "Champion"
+		else if substring(stylesheet.short_name, end:8) == "Follower" then "Follower"
+		else if (substring(stylesheet.short_name, end:5) == "Spell") and (stylesheet.short_name != "Spell Splash") then "Spell"
+		else if substring(stylesheet.short_name, end:8) == "Landmark" then "Landmark"
+		else stylesheet.short_name }
+	type_line := {
+		if template_type() == "Pre-rendered" then value
+		else if template_type() == "Champion" then (
+			if styling.set_level == "Level 2" then
+				"Unit — Champion (Lvl.2)"
+			else "Unit — Champion (Lvl.1)" )
+		else if template_type() == "Follower" then
+			"Unit — Follower"
+		else if template_type() == "Spell" then (
+			v := card.keysymbolreal
+			if styling.no_of_keywords != 1 then (
+				v := card.keysymbol1
+				if substring(v, end:5) != "Spell" then (
+					v := card.keysymbol2
+					if substring(v, end:5) != "Spell" then (
+						v := card.keysymbol3
+						if substring(v, end:5) != "Spell" then (
+							v := card.keysymbol4
+						)
+					)
+				)
+			)
+			if styling.set_spell_speed_frame == "Burst" or (styling.set_spell_speed_frame == "Default" and v == "Spell Burst") then "Spell - Burst"
+			else if styling.set_spell_speed_frame == "Focus" or (styling.set_spell_speed_frame == "Default" and v == "Spell Focus") then "Spell - Focus"
+			else if styling.set_spell_speed_frame == "Fast" or (styling.set_spell_speed_frame == "Default" and v == "Spell Fast") then "Spell - Fast"
+			else if styling.set_spell_speed_frame == "Skill" or (styling.set_spell_speed_frame == "Default" and v == "Spell Skill") then "Skill"
+			else if styling.set_spell_speed_frame == "Trap" or (styling.set_spell_speed_frame == "Default" and v == "Spell Trap") then "Trap"
+			else if styling.set_spell_speed_frame == "Boon" or (styling.set_spell_speed_frame == "Default" and v == "Spell Boon") then "Trap"
+			else if styling.set_spell_speed_frame == "Origin" or (styling.set_spell_speed_frame == "Default" and v == "Spell Origin") then "Origin"
+			else if styling.set_spell_speed_frame == "Equipment" or (styling.set_spell_speed_frame == "Default" and v == "Spell Equipment") then "Equipment"
+			else "Spell - Slow"
+			)
+		else if template_type() == "Unit Splash" then
+			"Splash — Unit"
+		else if template_type() == "Spell Splash" then
+			"Splash — Spell"
+		else template_type() }
+		
+	keyword_no := {
+		if (template_type() == "Spell" or template_type() == "Landmark") then styling.no_of_keywords
+		else styling.number_of_keywords
+	}
+
+	keyword_filter := {
+		ret := value
+		if (set.automatic_caps) then ret := to_upper(ret)
+		if (template_type() == "Tooltip") or (template_type() == "Unit Splash") or (template_type() == "Spell Splash") then
+			ret
+		else if keyword_no() == 2 then 
+			if card.keysymbol1 == "Standard Can't Attack" and card.keysymbol2 == "Standard Can't Block" and set.automatic_keyword_text then 
+				"IMMOBILE"
+			else ret
+		else if substring(card.keysymbolreal, end:5) == "Spell" and set.automatic_keyword_text then
+			to_upper(substring(card.keysymbolreal, begin:6))
+		else if substring(card.keysymbolreal, end:8) == "Standard" and set.automatic_keyword_text then
+			to_upper(substring(card.keysymbolreal, begin:9))
+		else if card.keysymbolreal == "Landmark" and set.automatic_keyword_text then
+			"LANDMARK"
+		else ret
+	}
+		
+	get_darkness := {
+		if styling.set_shadow == "Light" then 0.25
+		else if styling.set_shadow == "Moderate" then 0.5
+		else if styling.set_shadow == "Heavy" then 0.75
+		else if styling.set_shadow == "Extreme" then 1
+		else 0
+	}
+
+	############################################################## Other boxes
+	
+	# Process the name for sorting rules
+	sort_name :=
+		# Remove "The", "A", and "And" at the beginning
+		replace@(match: "^(The|An?) ", replace: "") +
+		# Remove commas and apostrophes
+		replace@(match: "(,|'|’)", replace: "") +
+		# Remove bold and italic tags
+		replace@(match: "(<b>|<i>|</b>|</i>)", replace: "") +
+		# Make lowercase
+		to_lower
+	
+	word_count := break_text@(match:"[^[:space:]]+") + length
+	line_count := split_text@(match:"\n+",include_empty:false) + length
+	
+############################################################## Set fields
+set field:
+	type: info
+	name: Set Information
+set field:
+	type: text
+	name: title
+	description: The name of the set.
+set field:
+	type: text
+	name: description
+	multi line: true
+	description: The summary of the set.
+set field:
+	type: text
+	name: artist
+	description: Enter an artist's name to have it appear in the bottom left of all cards by default.
+set field:
+	type: text
+	name: copyright
+	description: Enter a designer's name to have it appear in the bottom right of all cards.
+set field:
+	type: info
+	name: Defaults and Automation
+set field:
+	type: boolean
+	name: use new region placement
+	initial: yes
+	description: Places region icons in their own box in the top right, rather than on the bottom of the card.
+set field:
+	type: boolean
+	name: automatic caps
+	initial: yes
+	description: Automatically converts card names, subtypes and keyword boxes to full caps. Doesn't apply to tooltips names.
+set field:
+	type: boolean
+	name: use shadow
+	initial: yes
+	description: Adds a dark shadow between art and text on unit templates to improve clairty. The opacity can be edited card by card in the Style tab.
+set field:
+	type: boolean
+	name: use colour prompts
+	initial: yes
+	description: Prompts the user to add colour to spells if the default colour hasn't yet been changed.
+set field:
+	type: boolean
+	name: add space after color code
+	initial: no
+	description: Adds a space after adding a color code to ability text.
+set field:
+	type: boolean
+	name: automatic keyword text
+	initial: yes
+	description: Automatically fills the keyword text box according to the keyword symbol used.
+set field:
+	type: boolean
+	name: automatic card numbers
+	initial: no
+	description: This is actually useless but the code breaks if I remove it so yeah
+set field:
+	type: info
+	name: Custom Links
+set field:
+	type: text
+	name: Custom Region 1
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom region menu.
+set field:
+	type: text
+	name: Custom Region 2
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom region menu.
+set field:
+	type: text
+	name: Custom Region 3
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom region menu.
+set field:
+	type: text
+	name: Custom Region 4
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom region menu.
+set field:
+	type: text
+	name: Custom Region 5
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom region menu.
+set field:
+	type: text
+	name: Custom Symbol 1
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: text
+	name: Custom Symbol 2
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: text
+	name: Custom Symbol 3
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: text
+	name: Custom Symbol 4
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: text
+	name: Custom Symbol 5
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: text
+	name: Custom Symbol 6
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: text
+	name: Custom Symbol 7
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: text
+	name: Custom Symbol 8
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: text
+	name: Custom Symbol 9
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: text
+	name: Custom Symbol 10
+	description: Place an image file in the custom folder in LoR.mse-game and enter its filename here to have it appear on the custom symbol menu on keyword boxes. Check the README on how to add keyword symbols in-line.
+set field:
+	type: info
+	name: Card Fonts
+set field:
+	type: text
+	name: Title Font
+	description: Enter the name of a font to use for the title of cards, or leave blank to default to BeaufortforLOL-Bold (if installed)
+set field:
+	type: text
+	name: Keyword Font
+	description: Enter the name of a font to use for keywords and for spell token types, or leave blank to default to BeaufortforLOL-Bold (if installed)
+set field:
+	type: text
+	name: Text Font
+	description: Enter the name of a font to use ability text of cards, or leave blank to default to Univers 55 (if installed)
+set field:
+	type: text
+	name: Stats Font
+	description: Enter the name of a font to use cost, power and health, or leave blank to default to BeaufortforLOL-Bold (if installed)
+set field:
+	type: text
+	name: Grouping Font
+	description: Enter the name of a font to use the subtype at the top of cards and for the title of tooltips, or leave blank to default to Univers LT Std 59 UltraCn (if installed)
+set field:
+	type: text
+	name: Illustrator and Designer Font
+	description: Enter the name of a font to use for artist and designer credit, or leave blank to default to BeaufortforLOL-Bold (if installed)
+set field:
+	type: info
+	name: Card Text Colors
+set field:
+	type: color
+	name: Title Color
+	initial: rgb(255, 255, 255)
+	choice:
+		name: Default
+		color: rgb(255, 255, 255)
+	description: Sets the color of card titles.
+set field:
+	type: color
+	name: Keyword Color
+	initial: rgb(240,204,112)
+	choice:
+		name: Default
+		color: rgb(240,204,112)
+	description: Sets the color of text in keyword boxes.
+set field:
+	type: color
+	name: Ability Color
+	initial: rgb(255, 255, 255)
+	choice:
+		name: Default
+		color: rgb(255, 255, 255)
+	description: Sets the color of ability text.
+set field:
+	type: color
+	name: Level Condition Color
+	initial: rgb(223,154,122)
+	choice:
+		name: Default
+		color: rgb(223,154,122)
+	description: Sets the color of level up text.
+set field:
+	type: color
+	name: Stats Color
+	initial: rgb(255, 255, 255)
+	choice:
+		name: Default
+		color: rgb(255, 255, 255)
+	description: Sets the color of cost, power and health digits.
+set field:
+	type: color
+	name: Grouping Color
+	initial: rgb(173,168,157)
+	choice:
+		name: Default
+		color: rgb(173,168,157)
+	description: Sets the color of subtypes shown at the top of cards.
+set field:
+	type: color
+	name: Token Color
+	initial: rgb(120,120,110)
+	choice:
+		name: Default
+		color: rgb(120,120,110)
+	description: Sets the color of token tags shown at the bottom of token spells, usually Treasures.
+set field:
+	type: color
+	name: Illustrator and Designer Color
+	initial: rgb(0, 0, 0)
+	choice:
+		name: Default
+		color: rgb(0, 0, 0)
+	description: Sets the color of artist and designer names.
+############################# Default style
+default set style:
+	title:
+		padding left: 2
+		font:
+			size: 16
+############################################################## Card fields
+############################# Background stuff
+card field:
+	type: choice
+	name: background
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: text
+	name: cardCode
+	show statistics: false
+	editable: false
+card field:
+	type: color
+	name: truebackground
+	initial: rgb(255,255,255)
+	choice:
+		name: white
+		color: rgb(255,255,255)
+	choice:
+		name: black
+		color: rgb(0,0,0)
+	choice:
+		name: silver
+		color: rgb(128,128,128)
+	choice:
+		name: dark gray
+		color: rgb(60, 60, 60)
+	choice:
+		name: dark red
+		color: rgb(60, 0, 0)
+	choice:
+		name: dark green
+		color: rgb(0, 60, 0)
+	choice:
+		name: dark blue
+		color: rgb(0, 0, 60)
+	choice:
+		name: red
+		color: rgb(150, 0, 0)
+	choice:
+		name: brown
+		color: rgb(100, 50, 0)
+	choice:
+		name: gold
+		color: rgb(130,120,0)
+	choice:
+		name: green
+		color: rgb(0, 150, 0)
+	choice:
+		name: teal
+		color: rgb(0, 82, 79)
+	choice:
+		name: blue
+		color: rgb(0, 0, 150)
+	choice:
+		name: purple
+		color: rgb(49, 22, 92)
+	choice:
+		name: pink
+		color: rgb(200, 0, 200)
+	choice:
+		name: dark gray (discord)
+		color: rgb(54, 57, 63)
+	show statistics: false
+card field:
+	type: image
+	name: backgroundimage
+	show statistics: false
+	description: The background image of the card
+card field:
+	type: choice
+	name: typebox
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: regionbox
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: backdrop
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: darkness
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: color
+	name: artist arrow
+	script: set.Illustrator_and_Designer_Color
+	show statistics: false
+############################# Name line
+card field:
+	type: text
+	name: name
+	identifying: true
+	show statistics: false
+	card list visible: true
+	card list column: 1
+	card list width: 150
+	multi line: true
+	description: The name of the card
+	script: if (set.automatic_caps and template_type() != "Tooltip" and template_type() != "Pre-rendered") then to_upper(value) else value
+############################# Image
+card field:
+	type: image
+	name: image
+	show statistics: false
+	description: The image of the card
+card field:
+	type: image
+	name: image2
+	show statistics: false
+	description: The secondary image of the card
+card field:
+	type: choice
+	name: defaultback
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: color
+	name: colorback
+	initial: rgb(127,127,127)
+	choice:
+		name: silver
+		color: rgb(128,128,128)
+	choice:
+		name: dark gray
+		color: rgb(60, 60, 60)
+	choice:
+		name: dark red
+		color: rgb(60, 0, 0)
+	choice:
+		name: dark green
+		color: rgb(0, 60, 0)
+	choice:
+		name: dark blue
+		color: rgb(0, 0, 60)
+	choice:
+		name: red
+		color: rgb(150, 0, 0)
+	choice:
+		name: brown
+		color: rgb(100, 50, 0)
+	choice:
+		name: gold
+		color: rgb(130,120,0)
+	choice:
+		name: green
+		color: rgb(0, 150, 0)
+	choice:
+		name: teal
+		color: rgb(0, 82, 79)
+	choice:
+		name: blue
+		color: rgb(0, 0, 150)
+	choice:
+		name: purple
+		color: rgb(49, 22, 92)
+	choice:
+		name: pink
+		color: rgb(200, 0, 200)
+	choice:
+		name: black
+		color: rgb(0,0,0)
+	choice:
+		name: white
+		color: rgb(255,255,255)
+	show statistics: false
+############################# Card type
+card field:
+	type: choice
+	name: region
+	card list visible: true
+	card list column: 3
+	card list width: 100
+	description: The region of the card
+	script:
+		if (template_type() == "Tooltip") then ""
+		else if (value == "") then "Runeterra"
+		else value
+	icon: stats/card_type.png
+	choice: 
+		name: None
+		line below: true
+	choice: Demacia
+	choice: Freljord
+	choice: Ionia
+	choice: Noxus
+	choice: Piltover & Zaun
+	choice: Shadow Isles
+	choice: Bilgewater
+	choice: Targon
+	choice: Shurima
+	choice: Bandle City
+	choice: 
+		name: Runeterra
+		line below: true
+	choice: Ixtal
+	choice: The Void
+	choice: Kills
+	choice: Deaths
+	choice: 
+		name: Assists
+		line below: true
+	choice: 
+		name: Custom
+		choice: Region 1
+		choice: Region 2
+		choice: Region 3
+		choice: Region 4
+		choice: Region 5
+	initial: Runeterra
+card field:
+	type: choice
+	name: region2
+	description: The second region of the card
+	choice: 
+		name: None
+		line below: true
+	choice: Demacia
+	choice: Freljord
+	choice: Ionia
+	choice: Noxus
+	choice: Piltover & Zaun
+	choice: Shadow Isles
+	choice: Bilgewater
+	choice: Targon
+	choice: Shurima
+	choice: Bandle City
+	choice: 
+		name: Runeterra
+		line below: true
+	choice: Ixtal
+	choice: The Void
+	choice: Kills
+	choice: Deaths
+	choice: 
+		name: Assists
+		line below: true
+	choice: 
+		name: Custom
+		choice: Region 1
+		choice: Region 2
+		choice: Region 3
+		choice: Region 4
+		choice: Region 5
+	initial: Runeterra
+card field:
+	type: choice
+	name: region3
+	description: The second region of the card
+	choice: 
+		name: None
+		line below: true
+	choice: Demacia
+	choice: Freljord
+	choice: Ionia
+	choice: Noxus
+	choice: Piltover & Zaun
+	choice: Shadow Isles
+	choice: Bilgewater
+	choice: Targon
+	choice: Shurima
+	choice: Bandle City
+	choice: 
+		name: Runeterra
+		line below: true
+	choice: Ixtal
+	choice: The Void
+	choice: Kills
+	choice: Deaths
+	choice: 
+		name: Assists
+		line below: true
+	choice: 
+		name: Custom
+		choice: Region 1
+		choice: Region 2
+		choice: Region 3
+		choice: Region 4
+		choice: Region 5
+	initial: Runeterra
+card field:
+	type: choice
+	name: rarity
+	card list visible: true
+	card list column: 7
+	card list width: 100
+	description: The rarity of the card
+	default: if template_type() == "Champion" then (if styling.set_level == "Level 2" then "None" else "Champion") else if template_type() == "Landmark" then "Epic" else "Common"
+	script:
+		if (template_type() == "Pre-rendered") then value
+		else if ((template_type() == "Tooltip") or (template_type() == "Unit Splash") or (template_type() == "Spell Splash")) then "None"
+		else if (template_type() != "Champion" and value == "Champion") then "Common"
+		else if (template_type() == "Champion" and (value != "Champion" and value != "None")) then (if styling.set_level == "Level 2" then "None" else "Champion")
+		else if (template_type() != "Spell" and value == "Token") then "Common"
+		else value
+	choice: 
+		name: Champion
+		enabled: { template_type() == "Champion" }
+	choice: 
+		name: Epic
+		enabled: { template_type() != "Champion" }
+	choice: 
+		name: Rare
+		enabled: { template_type() != "Champion" }
+	choice: 
+		name: Common
+		enabled: { template_type() != "Champion" }
+		line below: true
+	choice: 
+		name: Token
+		enabled: false
+	choice: None
+card field:
+	type: text
+	name: category
+	card list visible: true
+	card list column: 2
+	card list width: 200
+	card list name: type
+	description: The type of card
+	script: type_line()
+############################# Text box
+card field:
+	type: text
+	name: ability
+	script: text_filter(value)
+	show statistics: false
+	multi line: true
+	description: The ability text of the card
+card field:
+	type: text
+	name: level ability
+	script: text_filter(value)
+	show statistics: false
+	multi line: true
+	description: The level ability text of the card
+card field:
+	type: text
+	name: typetype
+	show statistics: false
+	default: 
+		if template_type() == "Unit Splash" then "UNIT" else if template_type() == "Spell Splash" then "SPELL" else ""
+	description: The subtype of the card
+	card list column: 9
+	card list width: 150
+	script: if (set.automatic_caps) then to_upper(value) else value
+############################# PT
+card field:
+	type: text
+	name: cost
+	card list visible: true
+	card list column: 4
+	card list width: 50
+	card list name: cost
+	show statistics: false
+	description: The cost of the card
+card field:
+	type: text
+	name: power
+	card list visible: true
+	card list column: 5
+	card list width: 50
+	card list name: power
+	show statistics: false
+	description: The power of the card
+card field:
+	type: text
+	name: health
+	card list visible: true
+	card list column: 6
+	card list width: 50
+	card list name: health
+	show statistics: false
+	description: The health of the card
+############################# Keyword
+card field:
+	type: choice
+	name: keywordleft
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: keywordright
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: keywordmiddle
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: keywordbox1
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: keywordbox2
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: keywordbox3
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: keywordbox4
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: keysymbolreal
+	show statistics: false
+	choice:
+		name: None
+		line below: true
+	choice:
+		name: Standard
+		choice: Barrier
+		choice: Challenger
+		choice: Double Attack
+		choice: Elusive
+		choice: Ephemeral
+		choice: Fearsome
+		choice: Fleeting
+		choice: Lifesteal
+		choice: Overwhelm
+		choice: Quick Attack
+		choice: Regeneration
+		choice: 
+			name: Tough
+			line below: true
+		choice: Can't Attack
+		choice: 
+			name: Can't Block
+			line below: true
+		choice: Attune
+		choice: Deep
+		choice: Scout
+		choice: 
+			name: Vulnerable
+			line below: true
+		choice: SpellShield
+		choice: Fury
+		choice: Augment
+		choice: 
+			name: Lurk
+			line below: true
+		choice: Impact
+		choice: Fated
+		choice: Attach
+		choice: 
+			name: Formidable
+			line below: true
+		choice: Hallowed
+		choice: Evolve
+	choice:
+		name: Spell
+		line below: true
+		choice: Burst
+		choice: Focus
+		choice: Fast
+		choice: 
+			name: Slow
+			line below: true
+		choice: Skill
+		choice: 
+			name: Equipment
+			line below: true
+		choice: Trap
+		choice: Boon
+		choice: Origin
+	choice: 
+		name: Custom
+		line below: true
+		choice: Symbol 1
+		choice: Symbol 2
+		choice: Symbol 3
+		choice: Symbol 4
+		choice: Symbol 5
+		choice: Symbol 6
+		choice: Symbol 7
+		choice: Symbol 8
+		choice: Symbol 9
+		choice: Symbol 10
+	choice:
+		name: Landmark
+		line below: true
+	choice: Blank
+	default: if template_type() == "Landmark" then "Landmark" else "None"
+card field:
+	type: text
+	name: keywordtext
+	show statistics: false
+	description: The keyword text
+	script: keyword_filter(value)
+card field:
+	type: choice
+	name: keysymbol1
+	show statistics: false
+	choice:
+		name: None
+		line below: true
+	choice:
+		name: Standard
+		choice: Barrier
+		choice: Challenger
+		choice: Double Attack
+		choice: Elusive
+		choice: Ephemeral
+		choice: Fearsome
+		choice: Fleeting
+		choice: Lifesteal
+		choice: Overwhelm
+		choice: Quick Attack
+		choice: Regeneration
+		choice: 
+			name: Tough
+			line below: true
+		choice: Can't Attack
+		choice: 
+			name: Can't Block
+			line below: true
+		choice: Attune
+		choice: Deep
+		choice: Scout
+		choice: 
+			name: Vulnerable
+			line below: true
+		choice: SpellShield
+		choice: Fury
+		choice: Augment
+		choice: 
+			name: Lurk
+			line below: true
+		choice: Impact
+		choice: Fated
+		choice: Attach
+		choice: 
+			name: Formidable
+			line below: true
+		choice: Hallowed
+		choice: Evolve
+	choice:
+		name: Spell
+		line below: true
+		choice: Burst
+		choice: Focus
+		choice: Fast
+		choice: 
+			name: Slow
+			line below: true
+		choice: Skill
+		choice: 
+			name: Equipment
+			line below: true
+		choice: Trap
+		choice: Boon
+		choice: Origin
+	choice: 
+		name: Custom
+		line below: true
+		choice: Symbol 1
+		choice: Symbol 2
+		choice: Symbol 3
+		choice: Symbol 4
+		choice: Symbol 5
+		choice: Symbol 6
+		choice: Symbol 7
+		choice: Symbol 8
+		choice: Symbol 9
+		choice: Symbol 10
+	choice:
+		name: Landmark
+		line below: true
+card field:
+	type: choice
+	name: keysymbol2
+	show statistics: false
+	choice:
+		name: None
+		line below: true
+	choice:
+		name: Standard
+		choice: Barrier
+		choice: Challenger
+		choice: Double Attack
+		choice: Elusive
+		choice: Ephemeral
+		choice: Fearsome
+		choice: Fleeting
+		choice: Lifesteal
+		choice: Overwhelm
+		choice: Quick Attack
+		choice: Regeneration
+		choice: 
+			name: Tough
+			line below: true
+		choice: Can't Attack
+		choice: 
+			name: Can't Block
+			line below: true
+		choice: Attune
+		choice: Deep
+		choice: Scout
+		choice: 
+			name: Vulnerable
+			line below: true
+		choice: SpellShield
+		choice: Fury
+		choice: Augment
+		choice: 
+			name: Lurk
+			line below: true
+		choice: Impact
+		choice: Fated
+		choice: Attach
+		choice: 
+			name: Formidable
+			line below: true
+		choice: Hallowed
+		choice: Evolve
+	choice:
+		name: Spell
+		line below: true
+		choice: Burst
+		choice: Focus
+		choice: Fast
+		choice: 
+			name: Slow
+			line below: true
+		choice: Skill
+		choice: 
+			name: Equipment
+			line below: true
+		choice: Trap
+		choice: Boon
+		choice: Origin
+	choice: 
+		name: Custom
+		line below: true
+		choice: Symbol 1
+		choice: Symbol 2
+		choice: Symbol 3
+		choice: Symbol 4
+		choice: Symbol 5
+		choice: Symbol 6
+		choice: Symbol 7
+		choice: Symbol 8
+		choice: Symbol 9
+		choice: Symbol 10
+	choice:
+		name: Landmark
+		line below: true
+card field:
+	type: choice
+	name: keysymbol3
+	show statistics: false
+	choice:
+		name: None
+		line below: true
+	choice:
+		name: Standard
+		choice: Barrier
+		choice: Challenger
+		choice: Double Attack
+		choice: Elusive
+		choice: Ephemeral
+		choice: Fearsome
+		choice: Fleeting
+		choice: Lifesteal
+		choice: Overwhelm
+		choice: Quick Attack
+		choice: Regeneration
+		choice: 
+			name: Tough
+			line below: true
+		choice: Can't Attack
+		choice: 
+			name: Can't Block
+			line below: true
+		choice: Attune
+		choice: Deep
+		choice: Scout
+		choice: 
+			name: Vulnerable
+			line below: true
+		choice: SpellShield
+		choice: Fury
+		choice: Augment
+		choice: 
+			name: Lurk
+			line below: true
+		choice: Impact
+		choice: Fated
+		choice: Attach
+		choice: 
+			name: Formidable
+			line below: true
+		choice: Hallowed
+		choice: Evolve
+	choice:
+		name: Spell
+		line below: true
+		choice: Burst
+		choice: Focus
+		choice: Fast
+		choice: 
+			name: Slow
+			line below: true
+		choice: Skill
+		choice: 
+			name: Equipment
+			line below: true
+		choice: Trap
+		choice: Boon
+		choice: Origin
+	choice: 
+		name: Custom
+		line below: true
+		choice: Symbol 1
+		choice: Symbol 2
+		choice: Symbol 3
+		choice: Symbol 4
+		choice: Symbol 5
+		choice: Symbol 6
+		choice: Symbol 7
+		choice: Symbol 8
+		choice: Symbol 9
+		choice: Symbol 10
+	choice:
+		name: Landmark
+		line below: true
+card field:
+	type: choice
+	name: keysymbol4
+	show statistics: false
+	choice:
+		name: None
+		line below: true
+	choice:
+		name: Standard
+		choice: Barrier
+		choice: Challenger
+		choice: Double Attack
+		choice: Elusive
+		choice: Ephemeral
+		choice: Fearsome
+		choice: Fleeting
+		choice: Lifesteal
+		choice: Overwhelm
+		choice: Quick Attack
+		choice: Regeneration
+		choice: 
+			name: Tough
+			line below: true
+		choice: Can't Attack
+		choice: 
+			name: Can't Block
+			line below: true
+		choice: Attune
+		choice: Deep
+		choice: Scout
+		choice: 
+			name: Vulnerable
+			line below: true
+		choice: SpellShield
+		choice: Fury
+		choice: Augment
+		choice: 
+			name: Lurk
+			line below: true
+		choice: Impact
+		choice: Fated
+		choice: Attach
+		choice: 
+			name: Formidable
+			line below: true
+		choice: Hallowed
+		choice: Evolve
+	choice:
+		name: Spell
+		line below: true
+		choice: Burst
+		choice: Focus
+		choice: Fast
+		choice: 
+			name: Slow
+			line below: true
+		choice: Skill
+		choice: 
+			name: Equipment
+			line below: true
+		choice: Trap
+		choice: Boon
+		choice: Origin
+	choice: 
+		name: Custom
+		line below: true
+		choice: Symbol 1
+		choice: Symbol 2
+		choice: Symbol 3
+		choice: Symbol 4
+		choice: Symbol 5
+		choice: Symbol 6
+		choice: Symbol 7
+		choice: Symbol 8
+		choice: Symbol 9
+		choice: Symbol 10
+	choice:
+		name: Landmark
+		line below: true
+card field:
+	type: choice
+	name: levelbar
+	choice: normal
+	show statistics: false
+	editable: false
+card field:
+	type: choice
+	name: tail
+	initial: Tail
+	show statistics: false
+	description: Whether or not the tooltip should have a tail
+	choice: 
+		name: Tail
+	choice: 
+		name: No tail
+############################# Card sorting / numbering
+card field:
+	type: text
+	name: card number
+	save value: false
+	script:
+		position(
+			of: card
+			in: set
+			order_by: { sort_name(card.name) }
+		) + 1
+		+ "/" +
+		number_of_items(in: set)
+	card list visible: true
+	card list column: 10
+	card list width: 50
+	card list name: #
+	editable: false
+	show statistics: false
+############################# Copyright stuff
+card field:
+	type: text
+	name: illustrator
+	default: set.artist
+	description: The illustrator of the image
+	icon: stats/illustrator.png
+card field:
+	type: text
+	name: copyright
+	default: set.copyright
+	show statistics: false
+	editable: false
+card field:
+	type: text
+	name: copyright line
+	save value: false
+	show statistics: false
+	script:
+		forward_editor(field: card.copyright)
+	description: The copyright and card number of the card
+############################################################### Extra Statistics
+statistics dimension:
+	name: cost
+	script: card.cost
+	icon: stats/number.png
+statistics dimension:
+	name: power
+	script: card.power
+	icon: stats/number.png
+statistics dimension:
+	name: health
+	script: card.health
+	icon: stats/number.png
+statistics dimension:
+	name: text length (words)
+	position hint: 100
+	script: word_count(to_text(card.rule_text))
+	numeric: true
+	bin size: 5
+	icon: stats/text_length.png
+statistics dimension:
+	name: text length (lines)
+	position hint: 101
+	script: line_count(to_text(card.rule_text))
+	numeric: true
+	icon: stats/text_length.png
+statistics dimension:
+	name: style
+	position hint: 1001
+	script: stylesheet.short_name
+	icon: stats/stylesheet.png
+############################################################## Auto replace
+# Do we need categories?
+#auto replace category: text box
+#auto replace category: copyright
+#auto replace category: ability
+auto replace:
+	match: (C)
+	replace: ©
+auto replace:
+	match: TM
+	replace: ™
+	whole word: false
+auto replace:
+	match: --
+	replace: —
+auto replace:
+	match: @
+	replace: <sym>@</sym>
+	
+#auto replace category: foundation
+auto replace:
+	match: Last Breath
+	replace: <sym>A</sym><color:rgb(250, 214, 90)>Last Breath</color>​
+auto replace:
+	match: Auto-Attach
+	replace: <color:rgb(250, 214, 90)>Auto-Attach</color>​
+auto replace:
+	match: Auto-Equip
+	replace: <color:rgb(250, 214, 90)>Auto-Equip</color>​
+auto replace:
+	match: Attach
+	replace: <sym>+</sym><color:rgb(250, 214, 90)>Attach</color>​
+auto replace:
+	match: Attached
+	replace: <sym>+</sym><color:rgb(250, 214, 90)>Attached</color>​
+auto replace:
+	match: <sym>+</sym><color:rgb(250, 214, 90)>Attach</color>​ed
+	replace: <sym>+</sym><color:rgb(250, 214, 90)>Attached</color>​
+auto replace:
+	match: Augment
+	replace: <sym>M</sym><color:rgb(250, 214, 90)>Augment</color>​
+auto replace:
+	match: Barrier
+	replace: <sym>B</sym><color:rgb(250, 214, 90)>Barrier</color>​
+auto replace:
+	match: Capture
+	replace: <sym>K</sym><color:rgb(250, 214, 90)>Capture</color>​
+auto replace:
+	match: Captures
+	replace: <sym>K</sym><color:rgb(250, 214, 90)>Captures</color>​
+auto replace:
+	match: <sym>K</sym><color:rgb(250, 214, 90)>Capture</color>​s
+	replace: <sym>K</sym><color:rgb(250, 214, 90)>Captures</color>​
+auto replace:
+	match: Captured
+	replace: <sym>K</sym><color:rgb(250, 214, 90)>Captured</color>​
+auto replace:
+	match: <sym>K</sym><color:rgb(250, 214, 90)>Capture</color>​d
+	replace: <sym>K</sym><color:rgb(250, 214, 90)>Captured</color>​
+auto replace:
+	match: Challenger
+	replace: <sym>C</sym><color:rgb(250, 214, 90)>Challenger</color>​
+auto replace:
+	match: Challenged
+	replace: <sym>C</sym><color:rgb(250, 214, 90)>Challenged</color>​
+auto replace:
+	match: Challenging
+	replace: <sym>C</sym><color:rgb(250, 214, 90)>Challenging</color>​
+auto replace:
+	match: Deep
+	replace: <sym>N</sym><color:rgb(250, 214, 90)>Deep</color>​
+auto replace:
+	match: Double Attack
+	replace: <sym>D</sym><color:rgb(250, 214, 90)>Double Attack</color>​
+auto replace:
+	match: Elusive
+	replace: <sym>E</sym><color:rgb(250, 214, 90)>Elusive</color>​
+auto replace:
+	match: Evolved
+	replace: <sym>*</sym><color:rgb(250, 214, 90)>Evolved</color>​
+auto replace:
+	match: Evolve
+	replace: <sym>*</sym><color:rgb(250, 214, 90)>Evolve</color>​
+auto replace:
+	match: <sym>*</sym><color:rgb(250, 214, 90)>Evolve</color>​d
+	replace: <sym>*</sym><color:rgb(250, 214, 90)>Evolved</color>​
+auto replace:
+	match: Fated
+	replace: <sym>^</sym><color:rgb(250, 214, 90)>Fated</color>​
+auto replace:
+	match: Fearsome
+	replace: <sym>F</sym><color:rgb(250, 214, 90)>Fearsome</color>​
+auto replace:
+	match: Fleeting
+	replace: <sym>G</sym><color:rgb(250, 214, 90)>Fleeting</color>​
+auto replace:
+	match: Formidable
+	replace: <sym>=</sym><color:rgb(250, 214, 90)>Formidable</color>​
+auto replace:
+	match: Frostbite
+	replace: <sym>I</sym><color:rgb(250, 214, 90)>Frostbite</color>​
+auto replace:
+	match: Frostbitten
+	replace: <sym>I</sym><color:rgb(250, 214, 90)>Frostbitten</color>​
+auto replace:
+	match: Fury
+	replace: <sym>Y</sym><color:rgb(250, 214, 90)>Fury</color>​
+auto replace:
+	match: Hallowed
+	replace: <sym>-</sym><color:rgb(250, 214, 90)>Hallowed</color>​
+auto replace:
+	match: Hallow
+	replace: <sym>-</sym><color:rgb(250, 214, 90)>Hallow</color>​
+auto replace:
+	match: <sym>-</sym><color:rgb(250, 214, 90)>Hallow</color>​ed
+	replace: <sym>-</sym><color:rgb(250, 214, 90)>Hallowed</color>​
+auto replace:
+	match: Invoke
+	replace: <sym>X</sym><color:rgb(250, 214, 90)>Invoke</color>​
+auto replace:
+	match: Lifesteal
+	replace: <sym>L</sym><color:rgb(250, 214, 90)>Lifesteal</color>​
+auto replace:
+	match: Lurk
+	replace: <sym>J</sym><color:rgb(250, 214, 90)>Lurk</color>​
+auto replace:
+	match: <sym>J</sym><color:rgb(250, 214, 90)>Lurk</color>​er
+	replace: Lurker
+auto replace:
+	match: Overwhelm
+	replace: <sym>O</sym><color:rgb(250, 214, 90)>Overwhelm</color>​
+auto replace:
+	match: Ephemeral
+	replace: <sym>P</sym><color:rgb(250, 214, 90)>Ephemeral</color>​
+auto replace:
+	match: Quick Attack
+	replace: <sym>Q</sym><color:rgb(250, 214, 90)>Quick Attack</color>​
+auto replace:
+	match: Regeneration
+	replace: <sym>R</sym><color:rgb(250, 214, 90)>Regeneration</color>​
+auto replace:
+	match: SpellShield
+	replace: <sym>H</sym><color:rgb(250, 214, 90)>SpellShield</color>​
+auto replace:
+	match: Spell Shield
+	replace: <sym>H</sym><color:rgb(250, 214, 90)>SpellShield</color>​
+auto replace:
+	match: Spellshield
+	replace: <sym>H</sym><color:rgb(250, 214, 90)>SpellShield</color>​
+auto replace:
+	match: Stun
+	replace: <sym>S</sym><color:rgb(250, 214, 90)>Stun</color>​
+auto replace:
+	match: Stunned
+	replace: <sym>S</sym><color:rgb(250, 214, 90)>Stunned</color>​
+auto replace:
+	match: <sym>S</sym><color:rgb(250, 214, 90)>Stun</color>​ned
+	replace: <sym>S</sym><color:rgb(250, 214, 90)>Stunned</color>​
+auto replace:
+	match: Tough
+	replace: <sym>T</sym><color:rgb(250, 214, 90)>Tough</color>​
+auto replace:
+	match: Attune
+	replace: <sym>U</sym><color:rgb(250, 214, 90)>Attune</color>​
+auto replace:
+	match: Vulnerable
+	replace: <sym>V</sym><color:rgb(250, 214, 90)>Vulnerable</color>​
+auto replace:
+	match: Scout
+	replace: <sym>W</sym><color:rgb(250, 214, 90)>Scout</color>​
+auto replace:
+	match: Impact
+	replace: <sym>Z</sym><color:rgb(250, 214, 90)>Impact</color>​
+	
+#### can't
+auto replace:
+	match: Can't Attack
+	replace: <sym>/</sym><color:rgb(250, 214, 90)>Can't Attack</color>​
+auto replace:
+	match: Can't Block
+	replace: <sym>\</sym><color:rgb(250, 214, 90)>Can't Block</color>​
+auto replace:
+	match: Immobile
+	replace: <sym>/\</sym><color:rgb(250, 214, 90)>Immobile</color>​
+auto replace:
+	match: <sym>/</sym><color:rgb(250, 214, 90)>Can't Attack</color>​ or Block
+	replace: <sym>/\</sym><color:rgb(250, 214, 90)>Immobile</color>​
+auto replace:
+	match: <sym>/</sym><color:rgb(250, 214, 90)>Can't Attack</color>​ Or Block
+	replace: <sym>/\</sym><color:rgb(250, 214, 90)>Immobile</color>​
+	
+### speed
+auto replace:
+	match: Burst
+	replace: <sym>!</sym><color:rgb(250, 214, 90)>Burst</color>​
+auto replace:
+	match: Focus
+	replace: <sym>,</sym><color:rgb(250, 214, 90)>Focus</color>​
+auto replace:
+	match: Fast
+	replace: <sym>?</sym><color:rgb(250, 214, 90)>Fast</color>​
+auto replace:
+	match: Slow
+	replace: <sym>.</sym><color:rgb(250, 214, 90)>Slow</color>​
+auto replace:
+	match: Skill
+	replace: <sym>@</sym><color:rgb(250, 214, 90)>Skill</color>​
+auto replace:
+	match: Skills
+	replace: <sym>@</sym><color:rgb(250, 214, 90)>Skills</color>​
+auto replace:
+	match: <sym>@</sym><color:rgb(250, 214, 90)>Skill</color>​s
+	replace: <sym>@</sym><color:rgb(250, 214, 90)>Skills</color>​
+	
+### triggers
+auto replace:
+	match: Play
+	replace: <color:rgb(250, 214, 90)>Play</color>​
+auto replace:
+	match: Play or Strike
+	replace: <color:rgb(250, 214, 90)>Play</color> or <color:rgb(250, 214, 90)>Strike</color>​
+auto replace:
+	match: Play or Attack
+	replace: <color:rgb(250, 214, 90)>Play</color> or <color:rgb(250, 214, 90)>Attack</color>​
+auto replace:
+	match: Attack
+	replace: <color:rgb(250, 214, 90)>Attack</color>​
+auto replace:
+	match: Nexus Strike
+	replace: <color:rgb(250, 214, 90)>Nexus Strike</color>​
+auto replace:
+	match: Strike
+	replace: <color:rgb(250, 214, 90)>Strike</color>​
+auto replace:
+	match: Strikes
+	replace: <color:rgb(250, 214, 90)>Strikes</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Strike</color>​s
+	replace: <color:rgb(250, 214, 90)>Strikes</color>​
+auto replace:
+	match: Struck
+	replace: <color:rgb(250, 214, 90)>Struck</color>​
+auto replace:
+	match: strike
+	replace: <color:rgb(250, 214, 90)>strike</color>​
+auto replace:
+	match: strikes
+	replace: <color:rgb(250, 214, 90)>strikes</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>strike</color>​s
+	replace: <color:rgb(250, 214, 90)>strikes</color>​
+auto replace:
+	match: struck
+	replace: <color:rgb(250, 214, 90)>struck</color>​
+auto replace:
+	match: Round Start
+	replace: <color:rgb(250, 214, 90)>Round Start</color>​
+auto replace:
+	match: Round End
+	replace: <color:rgb(250, 214, 90)>Round End</color>​
+
+#### nonsymbol
+auto replace:
+	match: advance
+	replace: <color:rgb(250, 214, 90)>advance</color>​
+auto replace:
+	match: Advance
+	replace: <color:rgb(250, 214, 90)>Advance</color>​
+auto replace:
+	match: Allegiance
+	replace: <color:rgb(250, 214, 90)>Allegiance</color>​
+auto replace:
+	match: Behold
+	replace: <color:rgb(250, 214, 90)>Behold</color>​
+auto replace:
+	match: Blade Dance
+	replace: <color:rgb(250, 214, 90)>Blade Dance</color>​
+auto replace:
+	match: Countdown
+	replace: <color:rgb(250, 214, 90)>Countdown</color>​
+auto replace:
+	match: Daybreak
+	replace: <color:rgb(250, 214, 90)>Daybreak</color>​
+auto replace:
+	match: Drain
+	replace: <color:rgb(250, 214, 90)>Drain</color>​
+auto replace:
+	match: everywhere
+	replace: <color:rgb(250, 214, 90)>everywhere</color>​
+auto replace:
+	match: Enlightened
+	replace: <color:rgb(250, 214, 90)>Enlightened</color>​
+auto replace:
+	match: Equip
+	replace: <color:rgb(250, 214, 90)>Equip</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Equip</color>​ped
+	replace: <color:rgb(250, 214, 90)>Equipped</color>​
+auto replace:
+	match: Equipped
+	replace: <color:rgb(250, 214, 90)>Equipped</color>​
+auto replace:
+	match: equip
+	replace: <color:rgb(250, 214, 90)>equip</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>equip</color>​ment
+	replace: equipment
+auto replace:
+	match: <color:rgb(250, 214, 90)>equip</color>​ped
+	replace: <color:rgb(250, 214, 90)>equipped</color>​
+auto replace:
+	match: equipped
+	replace: <color:rgb(250, 214, 90)>equipped</color>​
+auto replace:
+	match: Flow
+	replace: <color:rgb(250, 214, 90)>Flow</color>​
+auto replace:
+	match: Forge
+	replace: <color:rgb(250, 214, 90)>Forge</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Forge</color>​d
+	replace: <color:rgb(250, 214, 90)>Forged</color>​
+auto replace:
+	match: Forged
+	replace: <color:rgb(250, 214, 90)>Forged</color>​
+auto replace:
+	match: Improvise
+	replace: <color:rgb(250, 214, 90)>Improvise</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Improvise</color>​s
+	replace: <color:rgb(250, 214, 90)>Improvises</color>​
+auto replace:
+	match: Improvised
+	replace: <color:rgb(250, 214, 90)>Improvised</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Improvise</color>​d
+	replace: <color:rgb(250, 214, 90)>Improvised</color>​
+auto replace:
+	match: Improvises
+	replace: <color:rgb(250, 214, 90)>Improvises</color>​
+auto replace:
+	match: Manifest
+	replace: <color:rgb(250, 214, 90)>Manifest</color>​
+auto replace:
+	match: Manifested
+	replace: <color:rgb(250, 214, 90)>Manifested</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Manifest</color>​ed
+	replace: <color:rgb(250, 214, 90)>Manifested</color>​
+auto replace:
+	match: Nab
+	replace: <color:rgb(250, 214, 90)>Nab</color>​
+auto replace:
+	match: Nightfall
+	replace: <color:rgb(250, 214, 90)>Nightfall</color>​
+auto replace:
+	match: Obliterate
+	replace: <color:rgb(250, 214, 90)>Obliterate</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Obliterate</color>​d
+	replace: <color:rgb(250, 214, 90)>Obliterated</color>​
+auto replace:
+	match: Origin
+	replace: <color:rgb(250, 214, 90)>Origin</color>​
+auto replace:
+	match: Plunder
+	replace: <color:rgb(250, 214, 90)>Plunder</color>​
+auto replace:
+	match: Predict
+	replace: <color:rgb(250, 214, 90)>Predict</color>​
+auto replace:
+	match: Predicted
+	replace: <color:rgb(250, 214, 90)>Predicted</color>​
+auto replace:
+	match: Prediction
+	replace: <color:rgb(250, 214, 90)>Prediction</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Predict</color>​ed
+	replace: <color:rgb(250, 214, 90)>Predicted</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Predict</color>​ion
+	replace: <color:rgb(250, 214, 90)>Prediction</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Predict</color>​ed
+	replace: <color:rgb(250, 214, 90)>Predicted</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Predict</color>​ion
+	replace: <color:rgb(250, 214, 90)>Prediction</color>​
+auto replace:
+	match: Rally
+	replace: <color:rgb(250, 214, 90)>Rally</color>​
+auto replace:
+	match: Recall
+	replace: <color:rgb(250, 214, 90)>Recall</color>​
+auto replace:
+	match: Recalled
+	replace: <color:rgb(250, 214, 90)>Recalled</color>​
+auto replace:
+	match: Reforge
+	replace: <color:rgb(250, 214, 90)>Reforge</color>​
+auto replace:
+	match: Reputation
+	replace: <color:rgb(250, 214, 90)>Reputation</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Recall</color>​ed
+	replace: <color:rgb(250, 214, 90)>Recalled</color>​
+auto replace:
+	match: restored the Sun Disk
+	replace: <color:rgb(250, 214, 90)>restored the Sun Disk</color>​
+auto replace:
+	match: Restored the Sun Disk
+	replace: <color:rgb(250, 214, 90)>Restored the Sun Disk</color>​
+auto replace:
+	match: Silence
+	replace: <color:rgb(250, 214, 90)>Silence</color>​
+auto replace:
+	match: slay
+	replace: <color:rgb(250, 214, 90)>slay</color>​
+auto replace:
+	match: slain
+	replace: <color:rgb(250, 214, 90)>slain</color>​
+auto replace:
+	match: Spawn
+	replace: <color:rgb(250, 214, 90)>Spawn</color>​
+auto replace:
+	match: Strongest
+	replace: <color:rgb(250, 214, 90)>Strongest</color>​
+auto replace:
+	match: strongest
+	replace: <color:rgb(250, 214, 90)>strongest</color>​
+auto replace:
+	match: Support
+	replace: <color:rgb(250, 214, 90)>Support</color>​
+auto replace:
+	match: Toss
+	replace: <color:rgb(250, 214, 90)>Toss</color>​
+auto replace:
+	match: Tossed
+	replace: <color:rgb(250, 214, 90)>Tossed</color>​
+auto replace:
+	match: <color:rgb(250, 214, 90)>Toss</color>​ed
+	replace: <color:rgb(250, 214, 90)>Tossed</color>​
+auto replace:
+	match: Weakest
+	replace: <color:rgb(250, 214, 90)>Weakest</color>​
+auto replace:
+	match: weakest
+	replace: <color:rgb(250, 214, 90)>weakest</color>​
+############################################################## Card pack items
+pack type:
+	name: champion
+	filter: card.rarity == "Champion"
+pack type:
+	name: epic
+	filter: card.rarity == "Epic"
+pack type:
+	name: rare
+	filter: card.rarity == "Rare"
+pack type:
+	name: common
+	filter: card.rarity == "Common"
+############################################################## Card packs
+pack type:
+	name: test pack
+	item:
+		name: champion
+		amount: 1
+	item:
+		name: epic
+		amount: 2
+	item:
+		name: rare
+		amount: 5
+	item:
+		name: common
+		amount: 7
+
+
+has keywords: false

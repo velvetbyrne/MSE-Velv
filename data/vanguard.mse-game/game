@@ -1,0 +1,26 @@
+﻿mse version: 0.3.8
+short name:  Vanguard
+full name: Cardfight!! Vanguard
+icon: icon.png
+position hint: 1
+installer group: Vanguard/Game
+
+version: 2021-04-05.01
+
+############################################################## The script
+
+init script: include file: script
+
+#card list color script: { cardlist_colour() }
+
+### New Vanguard-V Template by Eronan
+### Template by Kindrindra, based on EdTheMad's original work (2012-02-30) and Mooshra's Photoshop template
+
+############################################################## Lots of lists
+
+include file: card_fields
+include file: keywords
+include file: set_fields
+include file: packs
+
+############################################################## Other stuff

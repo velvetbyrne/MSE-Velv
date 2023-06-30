@@ -1,0 +1,1412 @@
+	mse version: 0.3.9
+game: vanguard
+short name:  OverDress
+full name: OverDress Series
+icon: icon.png
+position hint: 3
+installer group: Vanguard/D Series
+
+version: 2021-04-06.01
+depends on:
+	package: vanguard.mse-game
+	version: 2021-04-04.01
+depends on:
+	package: vanguard-v-symbols.mse-symbol-font
+	version: 2021-04-05.01
+depends on:
+	package: vanguard-v-rarity-symbols.mse-symbol-font
+	version: 2020-08-09.01
+depends on:
+	package: vanguard-v-style.mse-style
+	version: 2020-11-01.01
+
+card width: 415
+card height: 605
+card dpi: 140
+card background: rgb(200,200,200)
+
+init script:
+	image_mask := {
+		if has_no_bottom() then "mask_special.png"
+		else if is_order() then "mask_order.png"
+		else "mask_unit.png"
+	}
+	
+	has_no_bottom := {
+		(styling.special_print == "No Unit Border" or card.type == "Token" or card.type == "Other") and not is_order()
+	}
+	
+	is_white_text := {
+		card.type == "Token"
+	}
+	
+	d_nation_initials := {
+		if card.d_nation == "Brandt Gate" then "bg"
+		else if card.d_nation == "Keter Sanctuary" then "ks"
+		else if card.d_nation == "Dragon Empire" then "de"
+		else if card.d_nation == "Dark States" then "ds"
+		else if card.d_nation == "Stoicheia" then "st"
+		else "none"
+	}
+	
+	cost_image_filter := {
+		outline_image(img: "cost")
+	}
+	
+	##Name Text Outline
+	name_left		:= { 84 }
+	name_bottom		:= {
+		if is_order() then 572
+		else 551
+	}
+	name_width		:= { 254 }
+	name_height		:= { 23 }
+	name_colour		:= { if has_no_bottom() then rgb(255,255,255) else rgb(0,0,0) }
+	name_shadow		:= { rgb(0,0,0) }
+	
+	##Nation Text Outline
+	nation_text_right	:=	{
+		if is_order() then 264
+		else if has_no_bottom() then 368
+		else 363
+	}
+	nation_text_bottom	:=	{
+		if is_order() then 589
+		else if has_no_bottom() then 573
+		else 570
+	}
+	nation_text_width	:=	{ if is_order() then 110 else 116 }
+	nation_text_height	:=	{ 12 }
+	nation_text_alignment	:=	{
+		if has_no_bottom() then "middle left overflow-shrink"
+		else "middle center overflow-shrink"
+	}
+	nation_colour		:= {
+		if card.d_nation == "None" then rgba(0,0,0,0)
+		else rgb(255,255,255)
+	}
+	nation_shadow		:= {
+		if card.d_nation == "None" then rgba(0,0,0,0)
+		else if card.d_nation == "Brandt Gate" then rgb(71,117,131)
+		else if card.d_nation == "Keter Sanctuary" then rgb(162,131,5)
+		else if card.d_nation == "Dragon Empire" then rgb(156,34,39)
+		else if card.d_nation == "Dark States" then rgb(24,44,117)
+		else if card.d_nation == "Stoicheia" then rgb(10,94,52)
+		else rgba(0,0,0,125)
+	}
+	
+	##Race Text Outline
+	race_right		:= {
+		if is_order() then 264
+		else if has_no_bottom() then 364
+		else 358
+	}
+	race_bottom		:= {
+		if is_order() then 603
+		else if has_no_bottom() then 583
+		else 584
+	}
+	race_width		:= { 111 }
+	race_height		:= { 11 }
+	race_alignment	:=	{
+		if has_no_bottom() then "bottom left overflow-shrink"
+		else "bottom center overflow-shrink"
+	}
+	race_colour	:= { rgb(255,255,255) }
+	race_shadow	:= { rgb(0,0,0) }
+	
+	##Power Text Outline
+	power_left := { if has_no_bottom() then 120 else 88 }
+	power_bottom := { if has_no_bottom() then 584.5 else 583 }
+	power_width := { if not is_unit() or card.type == "G Guardian" then 0 else 70 }
+	power_height := { if not is_unit() or card.type == "G Guardian" then 0 else 25 }
+	power_colour := { rgb(213,200,56) }
+	power_shadow := { rgb(0,0,0) }
+	
+	###Critical Text Outline
+	critical_left := { 213 }
+	critical_bottom := { if has_no_bottom() then 580 else 584 }
+	critical_width := { 12 }
+	critical_height := { 16 }
+	critical_color := { rgb(0,0,0) }
+	critical_shadow := { rgb(255,255,255) }
+	
+	###Ability Text Outline
+	ability_left := { 15 }
+	ability_bottom := { if is_order() then 532 else 511 }
+	ability_width := { 385 }
+	ability_height := { if is_order() then 210 else 200 }
+	ability_color := { if is_white_text() then rgb(0,0,0) else rgb(255,255,255) }
+	ability_shadow := { if is_white_text() then rgb(255,255,255) else rgb(0,0,0) }
+	ability_alignment := { "bottom left overflow-shrink" }
+	ability_font := { "Optima" }
+	ability_size := { 9 }
+	ability_symbol_size := { 12.1 }
+	
+	##Flavour Text
+	flavour_left := { 20 }
+	flavour_bottom := {
+		if card.text == "" then ability_bottom()
+		else ability_bottom() - card_style.text.content_height - 20
+	}
+	flavour_height := { 30 }
+	
+	##Bottom Text Font
+	bottom_text_colour := {
+		if is_trigger() and not has_no_bottom() then rgb(0,0,0)
+		else rgb(255,255,255)
+	}
+	bottom_text_shadow := {
+		if is_trigger() and not has_no_bottom() then rgb(255,255,255)
+		else rgb(0,0,0)
+	}
+	bottom_text_font := { "Optima-Thin" }
+	bottom_text_size := { 7 }
+	
+	###Set Number Text Outline
+		set_num_left := { 21 }
+		set_num_bottom := { 603.5 }
+		set_num_width := { 80 }
+		set_num_height := { 15 }
+	###Illustrator Text Outline
+		illustrator_right := { 405 }
+		illustrator_bottom := { 603.5 }
+		illustrator_width := { 188 }
+		illustrator_height := { 15 }
+
+styling field:
+	type: choice
+	name: special print
+	description: Type of Special Print used.
+	choice: None
+	choice: No Effect Box
+	choice: No Unit Border
+
+card style:
+	image:
+		top: 0
+		left: 0
+		height: 605
+		width: 415
+		z index: -4
+		mask: { image_mask() }
+		default: image_bg.png
+	
+	type:
+		bottom: 605
+		left: 0
+		height: 79
+		width: 415
+		z index: -3
+		render style: image
+		choice images:
+			Normal: { if styling.special_print == "No Unit Border" then "normal.png" else d_nation_initials() + "_normal.png" }
+			Trigger: { if styling.special_print == "No Unit Border" then "trigger.png" else d_nation_initials() + "_trigger.png" }
+			Token: token.png
+			Normal Order: { d_nation_initials() + "_normalorder.png" }
+			Blitz Order: { d_nation_initials() + "_blitzorder.png" }
+			Set Order: { d_nation_initials() + "_setorder.png" }
+			Set Order/Prison: { d_nation_initials() + "_setorderprison.png" }
+			Set Order/World: { d_nation_initials() + "_setorderworld.png" }
+#			Normal Order: { if styling.special_print == "No Unit Border" then "normalorder.png" else d_nation_initials() + "_normalorder.png" }
+#			Blitz Order: { if styling.special_print == "No Unit Border" then "blitzorder.png" else d_nation_initials() + "_blitzorder.png" }
+#			Set Order: { if styling.special_print == "No Unit Border" then "setorderprison.png" else d_nation_initials() + "_setorder.png" }
+#			Set Order/Prison: { if styling.special_print == "No Unit Border" then "setorderprison.png" else d_nation_initials() + "_setorderprison.png" }
+#			Set Order/World: { if styling.special_print == "No Unit Border" then "setorderworld.png" else d_nation_initials() + "_setorderworld.png" }
+	
+	grade:
+		left: 5
+		top: 4
+		width: 54
+		height: 52
+		z index: 0
+		render style: image
+		choice images:
+			0: { d_nation_initials() + "_grade0.png" }
+			1: { d_nation_initials() + "_grade1.png" }
+			2: { d_nation_initials() + "_grade2.png" }
+			3: { d_nation_initials() + "_grade3.png" }
+	
+	skill:
+		left: 12.5
+		top: 57
+		width: 39
+		height: 33
+		z index: 0
+		render style: image
+		visible: { is_unit() }
+		choice images:
+			Boost: skill_boost.png
+			Intercept: skill_intercept.png
+			Twin Drive: skill_twindrive.png
+	
+	Trigger:
+		right: {if card.type == "Trigger" then true and 415 }
+		top: {if card.type == "Trigger" then true and 5 }
+		width: {if card.type == "Trigger" then true and 83 }
+		height: {if card.type == "Trigger" then true and 80 }
+		z index: -1
+		render style: image
+		visible: {card.type == "Trigger" }
+		choice images:
+			Heal: trigger_heal.png
+			Stand: trigger_stand.png
+			Critical: trigger_crit.png
+			Draw: trigger_draw.png
+			Front: trigger_stand.png
+			Over: trigger_over.png
+	
+	gift:
+		left: 4
+		top: 92
+		width: 55
+		height: 60
+		z index: 1
+		render style: image
+		visible: { is_unit() }
+		choice images:
+			Accel: /vanguard-v-style.mse-style/giftAccel.png
+			Force: /vanguard-v-style.mse-style/giftForce.png
+			Protect: /vanguard-v-style.mse-style/giftProtect.png
+			Persona Ride: personaride.png
+	
+	shield:
+		top: 153
+		left: 0
+		width: 40
+		height: 165
+		z index: 0
+		render style: image
+		visible: { is_unit() }
+		choice images:
+			5000: shield_5k.png
+			10000: shield_10k.png
+			15000: shield_15k.png
+			50000: shield_50k.png
+			0: shield_sentinel.png
+	
+	name:
+		left: { name_left() }
+		bottom: { name_bottom() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: 0
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_colour() }
+			shadow color: { name_shadow() }
+	
+	d nation:
+		bottom: { if is_order() then 568 else if has_no_bottom() then 582 else 547 }
+		right: { if has_no_bottom() then 250 else 365 }
+		height: 15
+		width: 22
+		z index: -2
+		render style: image
+		choice images:
+			Keter Sanctuary: ks_flag.png
+			Dragon Empire: de_flag.png
+			Dark States: ds_flag.png
+			Stoicheia: st_flag.png
+			Brandt Gate: bg_flag.png
+	
+	color:
+		top: 0
+		left: 0
+		height: 0
+		width: 0
+		z index: -4
+		render style: hidden
+	
+	race:
+		right: { race_right() }
+		bottom: { race_bottom() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 1
+		alignment: { race_alignment() }
+		font:
+			name: Optima-Thin
+			size: 8
+			scale down to: 7
+			color: { race_colour() }
+			shadow color: { race_shadow() }
+			shadow displacement x: 0
+			shadow displacement y: 0
+	
+	power:
+		left: { power_left() }
+		bottom: { power_bottom() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		z index: 0
+		visible: { is_unit() and card.type != "G Guardian" }
+		font:
+			name: Impact
+			size: 18
+			style: italic
+			color: { power_colour() }
+			shadow color: { power_shadow() }
+			shadow displacement x: 0
+			shadow displacement y: 0
+			shadow blur: 3
+	
+	critical:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		z index: 0
+		alignment: left top overflow-shrink
+		visible: { is_unit() }
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_color() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+	
+	text:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: 0
+		alignment: { ability_alignment() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		font:
+			name: { ability_font() }
+			size: { ability_size() }
+			scale down to: 5
+			color: { ability_color() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: { ability_symbol_size() }
+			alignment: middle center
+	
+	text_box_top:
+		bottom: { ability_bottom() - card_style.text.content_height }
+		left: { ability_left() - 6 }
+		height: 10
+		width: { ability_width() + 12 }
+		z index: -1
+		visible: { card.text != "" and not special_print_text() }
+		render style: image
+		choice images:
+			default: text_bg_top.png
+	
+	text_box:
+		bottom: { ability_bottom() + 1 }
+		left: { ability_left() - 6 }
+		height: { card_style.text.content_height + 1 }
+		width: { ability_width() + 12 }
+		z index: -1
+		visible: { card.text != "" and not special_print_text() }
+		render style: image
+		choice images:
+			default: text_bg.png
+			
+	text_box_bottom:
+		top: { ability_bottom() + 1 }
+		left: { ability_left() - 6 }
+		height: 7
+		width: { ability_width() + 12 }
+		z index: -1
+		visible: { card.text != "" and not special_print_text() }
+		render style: image
+		choice images:
+			default: text_bg_bottom.png
+	
+	flavor:
+		left: { flavour_left() }
+		bottom: { flavour_bottom() }
+		height: { flavour_height() }
+		width: { ability_width() }
+		z index: 0
+		alignment: bottom center overflow-shrink
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { not special_print_text() }
+		font:
+			name: MatrixBook
+			size: 9
+			weight: bold
+			scale down to: 6
+			color: rgb(255,255,255)
+			shadow color: rgb(0,0,0)
+			shadow blur: 1
+	
+	set number:
+		left: { set_num_left() }
+		bottom: { set_num_bottom() }
+		width: { set_num_width() }
+		height: { set_num_height() }
+		alignment: left top overflow-shrink
+		font:
+			name: { bottom_text_font() }
+			size: { bottom_text_size() }
+			color: { bottom_text_colour() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+		symbol font:
+			name: vanguard-v-rarity-symbols
+			scale down to: 6
+			size: 7.17
+			alignment: middle center
+	
+	illust:
+		right: { illustrator_right() }
+		bottom: { illustrator_bottom() }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right top overflow-shrink
+		font:
+			name: { bottom_text_font() }
+			size: { bottom_text_size() }
+			color: { bottom_text_colour() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1
+
+##Name Outline Fields
+extra card field:
+	type: text
+	name: name blur 01
+	show statistics: false
+	default: card.name
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: name blur 02
+	show statistics: false
+	default: card.name
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: name blur 03
+	show statistics: false
+	default: card.name
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: name blur 04
+	show statistics: false
+	default: card.name
+	card list allow: false
+	save value: false
+	editable: false
+
+##Nation Outline Fields
+extra card field:
+	type: text
+	name: nation text
+	show statistics: false
+	default: card.d_nation
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: nation blur 01
+	show statistics: false
+	default: card.d_nation
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: nation blur 02
+	show statistics: false
+	default: card.d_nation
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: nation blur 03
+	show statistics: false
+	default: card.d_nation
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: nation blur 04
+	show statistics: false
+	default: card.d_nation
+	card list allow: false
+	save value: false
+	editable: false
+
+##Race Outline Fields
+extra card field:
+	type: text
+	name: race blur 01
+	show statistics: false
+	default: card.race
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: race blur 02
+	show statistics: false
+	default: card.race
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: race blur 03
+	show statistics: false
+	default: card.race
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: race blur 04
+	show statistics: false
+	default: card.race
+	card list allow: false
+	save value: false
+	editable: false
+
+##Power Outline Fields
+extra card field:
+	type: text
+	name: power blur 01
+	show statistics: false
+	default: card.power
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: power blur 02
+	show statistics: false
+	default: card.power
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: power blur 03
+	show statistics: false
+	default: card.power
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: power blur 04
+	show statistics: false
+	default: card.power
+	card list allow: false
+	save value: false
+	editable: false
+
+##Critical Outline Fields
+extra card field:
+	type: text
+	name: critical blur 01
+	show statistics: false
+	default: card.critical
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: critical blur 02
+	show statistics: false
+	default: card.critical
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: critical blur 03
+	show statistics: false
+	default: card.critical
+	card list allow: false
+	save value: false
+	editable: false
+extra card field:
+	type: text
+	name: critical blur 04
+	show statistics: false
+	default: card.critical
+	card list allow: false
+	save value: false
+	editable: false
+
+##Ability Outline Fields
+extra card field:
+	type: text
+	name: ability blur 01
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: ability blur 02
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: ability blur 03
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: ability blur 04
+	show statistics: false
+	default: card.text
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+
+##Flavour Outline Fields
+extra card field:
+	type: text
+	name: flavour blur 01
+	show statistics: false
+	default: card.flavor
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: flavour blur 02
+	show statistics: false
+	default: card.flavor
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: flavour blur 03
+	show statistics: false
+	default: card.flavor
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+extra card field:
+	type: text
+	name: flavour blur 04
+	show statistics: false
+	default: card.flavor
+	card list allow: false
+	save value: false
+	editable: false
+	multi line: true
+
+##Illustrator Text
+extra card field:
+	type: text
+	name: illustrator text
+	default: "illust / "
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+
+##Flavour Text Boxes
+extra card field:
+	type: choice
+	name: flavour box left
+	show statistics: false
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+	choice: default
+
+extra card field:
+	type: choice
+	name: flavour box center
+	show statistics: false
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+	choice: default
+
+extra card field:
+	type: choice
+	name: flavour box right
+	show statistics: false
+	show statistics: false
+	card list allow: false
+	save value: false
+	editable: false
+	choice: default
+
+extra card style:
+	##Name Outline Style
+	name blur 01:
+		left: { name_left() }
+		bottom: { name_bottom() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: 0
+		visible: { has_no_bottom() }
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_colour() }
+			shadow color: { name_shadow() }
+			shadow blur: 4
+			shadow displacement x: -1
+			shadow displacement y: -1
+	
+	name blur 02:
+		left: { name_left() }
+		bottom: { name_bottom() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: 0
+		visible: { has_no_bottom() }
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_colour() }
+			shadow color: { name_shadow() }
+			shadow blur: 4
+			shadow displacement x: 1
+			shadow displacement y: -1
+	
+	name blur 03:
+		left: { name_left() }
+		bottom: { name_bottom() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: 0
+		visible: { has_no_bottom() }
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_colour() }
+			shadow color: { name_shadow() }
+			shadow blur: 4
+			shadow displacement x: -1
+			shadow displacement y: 1
+	
+	name blur 04:
+		left: { name_left() }
+		bottom: { name_bottom() }
+		width: { name_width() }
+		height: { name_height() }
+		alignment: center middle overflow-shrink
+		z index: 0
+		visible: { has_no_bottom() }
+		font:
+			name: Impact
+			style: italic
+			size: 13
+			color: { name_colour() }
+			shadow color: { name_shadow() }
+			shadow blur: 4
+			shadow displacement x: 1
+			shadow displacement y: 1
+	
+	##Nation Outline Style
+	nation text:
+		bottom: { nation_text_bottom() }
+		right: { nation_text_right() }
+		width: { nation_text_width() }
+		height: { nation_text_height() }
+		z index: 1
+		alignment: { nation_text_alignment() }
+		visible: { card.d_nation != "None" }
+		font:
+			name: Optima
+			size: 10
+			scale down to: 7.5
+			weight: bold
+			color: { nation_colour() }
+			shadow color: { nation_shadow() }
+			shadow displacement x: 0
+			shadow displacement y: 0
+			shadow blur: 3
+	
+	nation blur 01:
+		bottom: { nation_text_bottom() }
+		right: { nation_text_right() }
+		width: { nation_text_width() }
+		height: { nation_text_height() }
+		z index: -1
+		alignment: { nation_text_alignment() }
+		visible: { card.d_nation != "None" }
+		font:
+			name: Optima
+			size: 10
+			scale down to: 7.5
+			weight: bold
+			color: { nation_colour() }
+			shadow color: { nation_shadow() }
+			shadow displacement x: -1
+			shadow displacement y: -1
+			shadow blur: 3
+	
+	nation blur 02:
+		bottom: { nation_text_bottom() }
+		right: { nation_text_right() }
+		width: { nation_text_width() }
+		height: { nation_text_height() }
+		z index: -1
+		alignment: { nation_text_alignment() }
+		visible: { card.d_nation != "None" }
+		font:
+			name: Optima
+			size: 10
+			scale down to: 7.5
+			weight: bold
+			color: { nation_colour() }
+			shadow color: { nation_shadow() }
+			shadow displacement x: 1
+			shadow displacement y: -1
+			shadow blur: 3
+	
+	nation blur 03:
+		bottom: { nation_text_bottom() }
+		right: { nation_text_right() }
+		width: { nation_text_width() }
+		height: { nation_text_height() }
+		z index: -1
+		alignment: { nation_text_alignment() }
+		visible: { card.d_nation != "None" }
+		font:
+			name: Optima
+			size: 10
+			scale down to: 7.5
+			weight: bold
+			color: { nation_colour() }
+			shadow color: { nation_shadow() }
+			shadow displacement x: -1
+			shadow displacement y: 1
+			shadow blur: 3
+	
+	nation blur 04:
+		bottom: { nation_text_bottom() }
+		right: { nation_text_right() }
+		width: { nation_text_width() }
+		height: { nation_text_height() }
+		z index: -1
+		alignment: { nation_text_alignment() } 
+		visible: { card.d_nation != "None" }
+		font:
+			name: Optima
+			size: 10
+			scale down to: 7.5
+			weight: bold
+			color: { nation_colour() }
+			shadow color: { nation_shadow() }
+			shadow displacement x: 1
+			shadow displacement y: 1
+			shadow blur: 3
+	
+	##Race Outline Style
+	race blur 01:
+		right: { race_right() }
+		bottom: { race_bottom() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 0
+		alignment: { race_alignment() }
+		font:
+			name: Optima-Thin
+			size: 8
+			scale down to: 7
+			color: { race_colour() }
+			shadow color: { race_shadow() }
+			shadow displacement x: -1
+			shadow displacement y: -1
+			shadow blur: 1
+	
+	race blur 02:
+		right: { race_right() }
+		bottom: { race_bottom() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 0
+		alignment: { race_alignment() }
+		font:
+			name: Optima-Thin
+			size: 8
+			scale down to: 7
+			color: { race_colour() }
+			shadow color: { race_shadow() }
+			shadow displacement x: 1
+			shadow displacement y: -1
+			shadow blur: 1
+	
+	race blur 03:
+		right: { race_right() }
+		bottom: { race_bottom() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 0
+		alignment: { race_alignment() }
+		font:
+			name: Optima-Thin
+			size: 8
+			scale down to: 7
+			color: { race_colour() }
+			shadow color: { race_shadow() }
+			shadow displacement x: -1
+			shadow displacement y: 1
+			shadow blur: 1
+	
+	race blur 04:
+		right: { race_right() }
+		bottom: { race_bottom() }
+		width: { race_width() }
+		height: { race_height() }
+		z index: 0
+		alignment: { race_alignment() }
+		font:
+			name: Optima-Thin
+			size: 8
+			scale down to: 7
+			color: { race_colour() }
+			shadow color: { race_shadow() }
+			shadow displacement x: 1
+			shadow displacement y: 1
+			shadow blur: 1
+	
+	##Power Outline Style
+	power blur 01:
+		left: { power_left() }
+		bottom: { power_bottom() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		z index: -1
+		visible: { is_unit() and card.type != "G Guardian" }
+		font:
+			name: Impact
+			size: 18
+			style: italic
+			color: { power_colour() }
+			shadow color: { power_shadow() }
+			shadow displacement x: -1
+			shadow displacement y: -1
+			shadow blur: 3
+	
+	power blur 02:
+		left: { power_left() }
+		bottom: { power_bottom() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		z index: -1
+		visible: { is_unit() and card.type != "G Guardian" }
+		font:
+			name: Impact
+			size: 18
+			style: italic
+			color: { power_colour() }
+			shadow color: { power_shadow() }
+			shadow displacement x: 1
+			shadow displacement y: -1
+			shadow blur: 3
+	
+	power blur 03:
+		left: { power_left() }
+		bottom: { power_bottom() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		z index: -1
+		visible: { is_unit() and card.type != "G Guardian" }
+		font:
+			name: Impact
+			size: 18
+			style: italic
+			color: { power_colour() }
+			shadow color: { power_shadow() }
+			shadow displacement x: -1
+			shadow displacement y: 1
+			shadow blur: 3
+	
+	power blur 04:
+		left: { power_left() }
+		bottom: { power_bottom() }
+		width: { power_width() }
+		height: { power_height() }
+		alignment: center middle overflow-shrink
+		z index: -1
+		visible: { is_unit() and card.type != "G Guardian" }
+		font:
+			name: Impact
+			size: 18
+			style: italic
+			color: { power_colour() }
+			shadow color: { power_shadow() }
+			shadow displacement x: 1
+			shadow displacement y: 1
+			shadow blur: 3
+	
+	##Critical Outline Style
+	critical blur 01:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		visible: { is_unit() }
+		z index: -1
+		alignment: left top overflow-shrink
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_shadow() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: -1
+	
+	critical blur 02:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		z index: -1
+		alignment: left top overflow-shrink
+		visible: { is_unit() }
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_shadow() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: -1
+	
+	critical blur 03:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		z index: -1
+		alignment: left top overflow-shrink
+		visible: { is_unit() }
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_shadow() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: 1
+	
+	critical blur 04:
+		left: { critical_left() }
+		bottom: { critical_bottom() }
+		width: { critical_width() }
+		height: { critical_height() }
+		z index: -1
+		alignment: left top overflow-shrink
+		visible: { is_unit() }
+		font:
+			name: Impact
+			size: 10
+			scale down to: 6
+			color: { critical_shadow() }
+			shadow color: { critical_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: 1
+	
+	##Ability Outline Style
+	ability blur 01:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		visible: { special_print_text() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		font:
+			name: { ability_font() }
+			size: { ability_size() }
+			scale down to: 5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: -1
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: { ability_symbol_size() }
+			alignment: middle center
+	
+	ability blur 02:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		visible: { special_print_text() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		font:
+			name: { ability_font() }
+			size: { ability_size() }
+			scale down to: 5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: -1
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: { ability_symbol_size() }
+			alignment: middle center
+			
+	ability blur 03:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		visible: { special_print_text() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		font:
+			name: { ability_font() }
+			size: { ability_size() }
+			scale down to: 5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: 1
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: { ability_symbol_size() }
+			alignment: middle center
+	
+	ability blur 04:
+		left: { ability_left() }
+		bottom: { ability_bottom() }
+		width: { ability_width() }
+		height: { ability_height() }
+		z index: -1
+		alignment: { ability_alignment() }
+		visible: { special_print_text() }
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		font:
+			name: { ability_font() }
+			size: { ability_size() }
+			scale down to: 5
+			color: { ability_shadow() }
+			shadow color: { ability_shadow() }
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: 1
+		symbol font:
+			name: vanguard-v-symbols
+			scale down to: 5
+			size: { ability_symbol_size() }
+			alignment: middle center
+	
+	##Flavour Outline Style
+	flavour blur 01:
+		left: { flavour_left() }
+		bottom: { flavour_bottom() }
+		height: { flavour_height() }
+		width: { ability_width() }
+		z index: 0
+		alignment: bottom center overflow-shrink
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { not special_print_text() }
+		font:
+			name: MatrixBook
+			size: 9
+			weight: bold
+			scale down to: 6
+			color: rgb(255,255,255)
+			shadow color: rgb(0,0,0)
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: -1
+	
+	flavour blur 02:
+		left: { flavour_left() }
+		bottom: { flavour_bottom() }
+		height: { flavour_height() }
+		width: { ability_width() }
+		z index: 0
+		alignment: bottom center overflow-shrink
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { not special_print_text() }
+		font:
+			name: MatrixBook
+			size: 9
+			weight: bold
+			scale down to: 6
+			color: rgb(255,255,255)
+			shadow color: rgb(0,0,0)
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: -1
+			
+	flavour blur 03:
+		left: { flavour_left() }
+		bottom: { flavour_bottom() }
+		height: { flavour_height() }
+		width: { ability_width() }
+		z index: 0
+		alignment: bottom center overflow-shrink
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { not special_print_text() }
+		font:
+			name: MatrixBook
+			size: 9
+			weight: bold
+			scale down to: 6
+			color: rgb(255,255,255)
+			shadow color: rgb(0,0,0)
+			shadow blur: 1
+			shadow displacement x: -1
+			shadow displacement y: 1
+	
+	flavour blur 04:
+		left: { flavour_left() }
+		bottom: { flavour_bottom() }
+		height: { flavour_height() }
+		width: { ability_width() }
+		z index: 0
+		alignment: bottom center overflow-shrink
+		padding left: 1
+		padding right: 1
+		padding top: 1
+		padding bottom: 1
+		visible: { not special_print_text() }
+		font:
+			name: MatrixBook
+			size: 9
+			weight: bold
+			scale down to: 6
+			color: rgb(255,255,255)
+			shadow color: rgb(0,0,0)
+			shadow blur: 1
+			shadow displacement x: 1
+			shadow displacement y: 1
+	
+	##Flavour Text Box
+	flavour box left:
+		right: { flavour_left() + (ability_width() - card_style.flavor.content_width) / 2 }
+		bottom: { flavour_bottom() }
+		height: { card_style.flavor.content_height }
+		width: { 31 }
+		z index: -1
+		visible: { not special_print_text() }
+		render style: image
+		choice images: 
+			default: flavour_box_left.png
+			
+	flavour box center:
+		left: { flavour_left() + (ability_width() - card_style.flavor.content_width) / 2 }
+		bottom: { flavour_bottom() }
+		height: { card_style.flavor.content_height }
+		width: { card_style.flavor.content_width }
+		z index: -1
+		visible: { not special_print_text() }
+		render style: image
+		choice images: 
+			default: flavour_box.png
+	
+	flavour box right:
+		left: { flavour_left() + (ability_width() + card_style.flavor.content_width) div 2 }
+		bottom: { flavour_bottom() }
+		height: { card_style.flavor.content_height }
+		width: { 31 }
+		z index: -1
+		visible: { not special_print_text() }
+		render style: image
+		choice images: 
+			default: flavour_box_right.png
+	
+	##Illustrator Text
+	illustrator text:
+		right: { illustrator_right() - card_style.illust.content_width }
+		bottom: { illustrator_bottom() + 1 }
+		width: { illustrator_width() }
+		height: { illustrator_height() }
+		alignment: right center overflow-shrink
+		visible: { card.illust != "" }
+		font:
+			name: { bottom_text_font() }
+			size: { bottom_text_size() - 1 }
+			color: { bottom_text_colour() }
+			shadow color: { bottom_text_shadow() }
+			shadow blur: 1

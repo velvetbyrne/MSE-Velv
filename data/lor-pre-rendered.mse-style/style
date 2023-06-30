@@ -1,0 +1,102 @@
+﻿mse version: 2.0.0
+game: LoR
+short name: Pre-rendered
+installer group: Legends of Runeterra/normal style
+icon: card-sample.png
+position hint: 09
+
+version: 2022-09-05
+depends on:
+	package: LoR.mse-game
+	version: 2022-09-05
+depends on:
+	package: lor-symbol.mse-symbol-font
+	version: 2022-09-05
+
+card width: 680
+card height: 1024
+card dpi: 150
+# Author: kino
+# Based on: magic-new
+
+############################################################## Extra style options
+styling field:
+	type: boolean
+	name: use ability text
+	description: Toggles the visibility of the standard ability text.
+	initial: true
+styling field:
+	type: choice
+	name: number of keywords
+	description: Set the number of keywords to use. Keyword text can only be if used if this is set to 1.
+	choice: 0
+	choice: 1
+	choice: 2
+	choice: 3
+	choice: 4
+	initial: 0
+styling field:
+	type: choice
+	name: number of regions
+	description: Set the number of regions of the card. Only the first will be displayed in the cardlist.
+	choice: 0
+	choice: 1
+	choice: 2
+	choice: 3
+	initial: 1
+styling field:
+	type: choice
+	name: set shadow
+	description: Sets amount of shadow between the art and the text.
+	choice: None
+	choice: Light
+	choice: Moderate
+	choice: Heavy
+	choice: Extreme
+	initial: Moderate
+styling field:
+	type: text
+	name: set title font size
+	description: Sets the font size of the card's name. Leave blank to default to 22.
+styling field:
+	type: text
+	name: set text font size
+	description: Sets the font size of the card's ability text. Leave blank to default to 12.5.
+styling field:
+	type: text
+	name: set keyword chop
+	description: Overrides the regular sizing of the keyword box. Automatic resizing is disabled if this field contains a value.
+styling field:
+	type: text
+	name: set title offset
+	description: Adjusts the position of the name.
+styling field:
+	type: text
+	name: set keywords offset
+	description: Adjusts the position of the name and keywords.
+styling field:
+	type: text
+	name: set ability text offset
+	description: Adjusts the position of the ability text and everything above.
+styling field:
+	type: choice
+	name: conjoin first two keyword boxes
+	description: Determines when the first and second keyword boxes are merged into one when two or more are displayed.
+	initial: Only for "Can't Attack / Block"
+	choice: Never
+	choice: Only for "Can't Attack / Block"
+	choice: Always
+styling field:
+	type: boolean
+	name: use image background
+	description: Determines whether to use a block colour background an image input background.
+	initial: no
+############################################################## Card fields
+card style:
+	############################# Image
+	image:
+		left:	0
+		top:	0
+		width:	680
+		height:	1024
+############################################################## Extra card fields
