@@ -4,7 +4,7 @@ short name: Classicshifted Expanded Art
 full name: Classicshifted Expanded Art
 icon: card-sample.png
 installer group: magic/m15 style/normal cards
-position hint: 00
+position hint: 9999
 
 version: 2020-08-14
 depends on:

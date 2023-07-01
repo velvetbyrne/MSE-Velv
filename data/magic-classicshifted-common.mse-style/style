@@ -4,7 +4,7 @@ short name: Classicshifted Common
 full name: Classicshifted Common (without stamp notch)
 icon: card-sample.png
 installer group: magic/m15 style/normal cards
-position hint: 00
+position hint: 9999
 
 version: 2014-07-15
 depends on:
