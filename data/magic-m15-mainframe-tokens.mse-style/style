@@ -552,9 +552,9 @@ extra card field:
 	save value: false
 	script:
 		if set.automatic_card_numbers and not styling.remove_from_autocount then
-			forward_editor(prefix: card_number_m15() + "/" + card_count_m15() + " " + rarity_code() + " ", field: card.card_code_text)
+			forward_editor(prefix: rarity_code() + " " + card_number_m15(), field: card.card_code_text)
 		else
-			combined_editor(field1: card.custom_card_number, separator: " " + rarity_code() + " ", field2: card.card_code_text)
+		combined_editor(field1: card.custom_card_number, separator: " " + rarity_code() + " ", field2: card.card_code_text)
 extra card field:
 	type: choice
 	name: artist arrow
