@@ -1,5 +1,6 @@
-# Basic-M15-Magic-Pack
-Pack containing normal M15 frames for MSE. Recommended for slim builds.
+# Velvet Installation
+
+This is a modified version of the Basic M15 Pack used by Velvet. Includes some frames and oddities along with some WIPs. Will update as modifications continue to be added and tweaked.
 
 # Installation
 
