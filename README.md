@@ -1,6 +1,6 @@
 # Velvet Installation
 
-This is a modified version of the Basic M15 Pack used by Velvet. Includes some frames and oddities along with some WIPs. Will update as modifications continue to be added and tweaked.
+This is a modified version of the Basic M15 Pack used by Velvet. Includes some frames and oddities along with some WIPs. Will update as modifications continue to be added and tweaked. Some fonts may be missing and some frames may contain errors. Please proceed with caution.
 
 # Installation
 
