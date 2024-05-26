@@ -280,15 +280,15 @@ card style:
 	############################# Name line
 	name:
 		left: 32
-		top: 27
+		top: 31
 		right:  { 341 - card_style.casting_cost.content_width }
 		height: {23 - 0.5*shrink_name()}
 		alignment: bottom shrink-overflow
 		padding bottom: 0
 		z index: 3
 		font:
-			name: CC Ultimatum Bold Italic
-			size: {18 - shrink_name()}
+			name: Blockletter
+			size: {17 - shrink_name()}
 			color: black
 	casting cost:
 		right: 346

@@ -1,7 +1,7 @@
 ﻿mse version: 2.1.2
 game: magic
 short name: Gen Saga
-full name: GenevensiS Hi-Res Saga
+full name: Hi-Res
 icon: card_sample.png
 position hint: 077
 
@@ -63,14 +63,23 @@ init script:
 	
 	shrink_type :=
 	{
-		if styling.shrink_type != "" then (to_int(styling.shrink_type) or else 0)
-		else if length(remove_tags(card.type)) > 41 then 2 else if length(remove_tags(card.type)) > 38 then 1
+		if styling.shrink_type == "-" then 0
+		else if styling.shrink_type != "" then (clamp(to_int(styling.shrink_type), minimum: -40, maximum: 24) or else 0)
+		else if length(remove_tags(card.type)) > 41 then 2
+		else if length(remove_tags(card.type)) > 38 then 1
 		else 0
 	}
 	
 	shrink_name :=
 	{
-		to_int(styling.shrink_name) or else 0
+		if styling.shrink_name == "-" then 0
+		else clamp(to_int(styling.shrink_name), minimum: -40, maximum: 31) or else 0
+	}
+	
+	shrink_reminder :=
+	{
+		if styling.shrink_transformation_reminder_text == "-" then 0
+		else clamp(to_int(styling.shrink_transformation_reminder_text), minimum: -40, maximum: 25) or else 0
 	}
 	
 	has_extended_art :=
@@ -79,7 +88,7 @@ init script:
 		or
 		(
 			chosen(styling.extended_art, choice: "if land")
-			and (contains(card.super_type, match: "Land") or contains(replace(match: "Planeswalker", replace: "", card.super_type), match: "Plane"))
+			and (lang_setting("is_land")(card.super_type) or lang_setting("is_plane")(card.super_type))
 		)
 	}
 	
@@ -89,7 +98,7 @@ init script:
 		or
 		(
 			chosen(styling.legend_crown, choice: "normal if legendary")
-			and contains(card.super_type, match: "Legendary")
+			and lang_setting("is_legendary")(card.super_type)
 		)
 	}
 	
@@ -99,7 +108,7 @@ init script:
 		or
 		(
 			chosen(styling.legend_crown, choice: "special if legendary")
-			and contains(card.super_type, match: "Legendary")
+			and lang_setting("is_legendary")(card.super_type)
 		)
 	}
 	
@@ -109,7 +118,7 @@ init script:
 		else if	chosen(styling.land_leaf, choice: "yes") then true
 		else if (
 					chosen(styling.land_leaf , choice: "if land")
-					and (contains(card.super_type, match: "Land") or contains(replace(match: "Planeswalker", replace: "", card.super_type), match: "Plane"))
+					and (lang_setting("is_land")(card.super_type) or lang_setting("is_plane")(card.super_type))
 				) then true
 		else false
 	}
@@ -312,6 +321,7 @@ init script:
 		"sorcery" : "symbolsorcery"
 		"artifact" : "symbolartifact"
 		"enchantment" : "symbolenchantment"
+		"lesson" : "symbollesson"
 		"custom" : "symbolcustom"
 	]
 	
@@ -323,8 +333,8 @@ init script:
 	
 	reminder_image :=
 	{
-		name := "remindersaga" + ( if has_leaf() then "leaf" else "" ) + styling.transformation_reminder
-		image(name, side: "both")
+		if styling.transformation_reminder == "notch" then	image("remindernotchleft", side: "left")
+		else												image("remindersaga" + ( if has_leaf() then "leaf" else "" ) + styling.transformation_reminder, side: "both")
 	}
 	
 	pt_image :=
@@ -339,11 +349,7 @@ init script:
 					else if contains(match: ".png", styling.watermark) then ("/magic-watermarks.mse-include/" + styling.watermark)
 					else ""
 		if styling.watermark_opacity_percentage == "" then image
-		else (	alpha_value := to_number(styling.watermark_opacity_percentage) or else 100
-				alpha_value_clamped :=	if alpha_value < 0 then 0
-										else if alpha_value <= 100 then alpha_value/100
-										else 1
-				set_alpha(image, alpha: alpha_value_clamped) )
+		else set_alpha(image, alpha: get_alpha(styling.watermark_opacity_percentage, default: 100))
 	}
 	
 	set_symbol_image :=
@@ -387,6 +393,15 @@ init script:
 	{
 		if contains(styling.custom_chapter_icons, match: ".png") then (un_png(styling.custom_chapter_icons) + "_" + input + ".png")
 		else image("chap" + input, side: "left")
+	}
+	
+	get_alpha :=
+	{
+		alpha_value :=	if input == "" then default
+						else to_number(input) or else default
+		if alpha_value < 0 then 0.0
+		else if alpha_value <= 100 then alpha_value/100.0
+		else 1.0
 	}
 	
 	seven_abilities := { styling.textboxes == "seven" }
@@ -441,9 +456,7 @@ init script:
 	watermark_height :=
 	{
 		desired_height := 323 + (to_int(styling.increase_watermark_height) or else 0)
-		if desired_height > 800 then 800
-		else if desired_height < 0 then 0
-		else desired_height
+		clamp(desired_height, minimum: 0, maximum: 800)
 	}
 	
 	alt_rarity :=
@@ -463,6 +476,11 @@ init script:
 		else if	colons == 1 then color := split_text(string+splits[0]+":0,0,0:0,0,0:0.07:", match:",|:")
 		symbol_variation(symbol:set.symbol, border_radius: color.12, fill_type: "linear gradient", fill_color_1: rgb(color.0, color.1, color.2), fill_color_2: rgb(color.3, color.4, color.5), border_color_1: rgb(color.6, color.7, color.8), border_color_2: rgb(color.9, color.10, color.11), center_x:0.5, center_y:0.5, end_x:1, end_y:1)
 	}
+	
+	popout_left :=		{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.0 != "" then clamp(split.0, minimum: -500,	maximum: 800) else 0 }
+	popout_top :=		{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.1 != "" then clamp(split.1, minimum: -500,	maximum: 1100) else 0 }
+	popout_width :=		{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.2 != "" then clamp(split.2, minimum: 0,		maximum: 1500) else 0 }
+	popout_height :=	{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.3 != "" then clamp(split.3, minimum: 0,		maximum: 2000) else 0 }
 	
 	nameline_left_margin :=
 	{
@@ -531,7 +549,7 @@ init script:
 	
 	font_size := { if styling.font_size == "" then 26 else to_number(styling.font_size) or else 26 }
 	
-	split_comma := split_text@(match: ",")
+	split_comma := split_text@(match: " *, *")
 	
 	#break_hard_line := break_text@(match: "\\n")
 	
@@ -553,7 +571,7 @@ init script:
 			if c >= snaps_count then [-1]
 			else
 			(
-				index := (to_int(trim(snaps[c])) or else -1) - 1
+				index := (to_int(snaps[c]) or else -1) - 1
 				if index > active_count or index < 0 then [-1]
 				else [index]
 			)
@@ -567,11 +585,11 @@ init script:
 		
 		active_count := active_abilities() - 1
 		
-		total_max_possible_height := (if styling.transformation_reminder != "none" then 728 else 784) - (if card.alias != "" then 26 else 0)
+		total_max_possible_height := (if styling.transformation_reminder == "notch" then 733 else if styling.transformation_reminder != "none" then 728 else 784) - (if card.alias != "" then 26 else 0)
 		
 		chapter_icon_height := 62
 		chapter_icon_spacing := 10
-		chapter_icon_spacing_importance := clamp(to_number(styling.chapter_spacing_percentage) or else 0, minimum: 0, maximum: 100) / 100
+		chapter_icon_spacing_importance := (if styling.chapter_spacing_percentage == "" then 70 else clamp(to_number(styling.chapter_spacing_percentage) or else 70, minimum: 0, maximum: 100)) / 100
 		chapter_indexes := chapter_indexes(active_count: active_count)
 		chaptertrain_0_count := 0
 		chaptertrain_1_count := 0
@@ -656,23 +674,31 @@ init script:
 			index := chapter_info[0]
 			subindex := chapter_info[1]
 			count := chapter_info[2]
-			chapter_icon_height := 62
-			chapter_icon_spacing := 10
-			chaptertrain_desired_height := count * (chapter_icon_height + chapter_icon_spacing)																			###how much total space do the chapters and gaps between and around them want
-			textbox_missing_height := chaptertrain_desired_height - card_style["level_" + (index+1) + "_text"].height													###how much space is missing from the textbox
-			chaptertrain_offset := to_int(chapter_icon_spacing/2) - if textbox_missing_height >= 0 and count > 1 then 0 else to_int(textbox_missing_height/2)			###how far from the top of the textbox should the chaptertrain start
-			desired_interior_spacing := (count-1) * chapter_icon_spacing																								###how much total space do the gaps between chapters want
-			effective_interior_spacing := if desired_interior_spacing <= 0 then 0 else desired_interior_spacing - max(textbox_missing_height, 0)						###how much total space do the gaps between chapters actually have
-			effective_interior_spacing_per_chapter := effective_interior_spacing / max(count-1, 1)																		###how much space does each gap have (can be negative, chapters will then overlap)
-			top := card_style["level_" + (index+1) + "_text"].top + chaptertrain_offset + subindex * (chapter_icon_height + effective_interior_spacing_per_chapter)
+			if count < 1 then trace("count < 1 wtf")
+			chapter_icon_height := 57
+			chapter_icon_spacing := 8
+			desired_chapter_height := count * chapter_icon_height																										###how much total space do the chapter icons want
+			desired_spacing := (count-1) * chapter_icon_spacing																											###how much total space do the gaps between chapters want
+			desired_height := desired_chapter_height + desired_spacing																									###how much total space do the chapters and gaps between them want
+			textbox_height := card_style["level_" + (index+1) + "_text"].height																							###how much space is does the textbox offer
+			missing_height := desired_height - textbox_height																											###how much space is missing from the textbox
+			effective_spacing := desired_spacing - max(missing_height, 0)																								###how much total space do the gaps between chapters actually have
+			effective_spacing := max(effective_spacing, (count-1) * (chapter_icon_spacing - chapter_icon_height))														###chapters must always be at least chapter_icon_spacing pixels below the previous one
+			effective_spacing_per_chapter := effective_spacing / max(count-1,1)																							###how much space does each gap have (can be negative, chapters will then overlap)
+			effective_height := desired_chapter_height + effective_spacing																								###how much total space do the chapters and gaps between and around them want
+			offset := (textbox_height - effective_height)/2
+			top := card_style["level_" + (index+1) + "_text"].top + offset + subindex * (chapter_icon_height + effective_spacing_per_chapter)
 			
-			#trace("chaptertrain_desired_height "			+ chaptertrain_desired_height)
-			#trace("textbox_missing_height "					+ textbox_missing_height)
-			#trace("chaptertrain_offset "					+ chaptertrain_offset)
-			#trace("desired_interior_spacing "				+ desired_interior_spacing)
-			#trace("effective_interior_spacing "				+ effective_interior_spacing)
-			#trace("effective_interior_spacing_per_chapter "	+ effective_interior_spacing_per_chapter)
-			#trace("top "									+ top)
+			#trace("desired_chapter_height "			+ desired_chapter_height)
+			#trace("desired_spacing "				+ desired_spacing)
+			#trace("desired_height "					+ desired_height)
+			#trace("textbox_height "					+ textbox_height)
+			#trace("missing_height "					+ missing_height)
+			#trace("effective_spacing "				+ effective_spacing)
+			#trace("effective_spacing_per_chapter "	+ effective_spacing_per_chapter)
+			#trace("effective_height "				+ effective_height)
+			#trace("offset "							+ offset)
+			#trace("top "							+ top)
 			
 			top
 		)
@@ -833,11 +859,11 @@ styling field:
 styling field:
 	type: text
 	name: chapter spacing percentage
-	description: Determines the behavior of chapter icons when there is not enough space. 0 clumps them together. 100 spreads them apart as much as possible. Default is 0.
+	description: Determines the behavior of chapter icons when there is not enough space. 0 clumps them together. 100 spreads them apart as much as possible. Default is 70.
 #	localized caption:
 #		fr: Pourcentage d'espacement des chapitres
 #	localized description:
-#		fr: Espacer les icones des chapitres le plus possible: 100. Resserrer les icones des chapitres le plus possible: 0. Valeur par défaut: 0.
+#		fr: Espacer les icones des chapitres le plus possible: 100. Resserrer les icones des chapitres le plus possible: 0. Valeur par défaut: 70.
 styling field:
 	type: text
 	name: move chapter icons
@@ -882,6 +908,14 @@ styling field:
 	choice: if land
 	choice: no
 	initial: no
+styling field:
+	type: text
+	name: popout art coordinates
+	description: The coordinates for the popout image field, formatted as "left,top,width,height". Used to make the illustration jump in front of the frame.
+#	localized caption:
+#		fr: Coordonée de l'image superposée
+#	localized description:
+#		fr: Rajoute un champ d'illustration supplémentaire aux coordonées spécifiées. Formatté ainsi: "gauche,droite,largeur,longueur". Permet à l'illustration de passer devant le cadre de la carte.
 styling field:
 	type: text
 	name: watermark
@@ -970,6 +1004,7 @@ styling field:
 	choice: acorn
 	choice: swap
 	choice: tombstone
+	choice: lesson
 	choice: multitype
 	choice: structure
 	choice: creature
@@ -992,7 +1027,16 @@ styling field:
 	choice: short
 	choice: medium
 	choice: long
+	choice: notch
 	initial: none
+styling field:
+	type: text
+	name: shrink transformation reminder text
+	description: Reduces the reminder text's font size by this many points.
+#	localized caption:
+#		fr: Rapetisser le text de rappel
+#	localized description:
+#		fr: Réduire la taille du text de rappel de N points.
 styling field:
 	type: choice
 	name: fuse
@@ -1264,7 +1308,13 @@ card style:
 		height: 799
 		z index: 10
 		mask: { "image_" + ( if has_extended_art() then "extended_" else "" ) + ( if has_extended_art() and has_leaf() then "leaf_" else "" ) + "mask.png" }
-
+	mainframe image:
+		left: { popout_left() }
+		top: { popout_top() }
+		width: { popout_width() }
+		height: { popout_height() }
+		z index: 2000
+	
 	############################# Card type
 	type:
 		left: { 73 + (if styling.center_type then type_margin() else typeline_left_margin()) }
@@ -1950,28 +2000,28 @@ extra card style:
 		render style: image
 		image: { symbol_image() }
 	transformation reminder:
-		left: 0
-		top: 834
-		height: 101
-		width: { if styling.transformation_reminder == "long" then 506 else 400 }
+		left: { if styling.transformation_reminder == "notch" then 10 else 0 }
+		top: { if styling.transformation_reminder == "notch" then 845 else 834 }
+		height: { if styling.transformation_reminder == "notch" then 56 else 101 }
+		width: { if styling.transformation_reminder == "notch" then 53 else if styling.transformation_reminder == "long" then 506 else 400 }
 		z index: 22
 		visible: { styling.transformation_reminder != "none" }
 		render style: image
 		image: { reminder_image() }
 	transformation reminder text:
-		left: 6
-		top: 857
-		height: 60
-		width: { if styling.transformation_reminder == "short" then 298 else if styling.transformation_reminder == "medium" then 356 else if styling.transformation_reminder == "long" then 462 else 0 }
-		z index: 24
+		left: { if styling.transformation_reminder == "notch" then 55 else 6 }
+		top: { if styling.transformation_reminder == "notch" then 858 else 857 }
+		height: { if styling.transformation_reminder == "notch" then 30 else 60 }
+		width: { if styling.transformation_reminder == "notch" then 75 else if styling.transformation_reminder == "short" then 298 else if styling.transformation_reminder == "medium" then 356 else if styling.transformation_reminder == "long" then 462 else 0 }
+		z index: 46
 		font:
-			name: { if styling.name_font == "" then "Beleren Bold" else styling.name_font }
-			size: 30
+			name: { if styling.name_font == "" then (if styling.transformation_reminder == "notch" then "ModMatrix" else "Beleren Bold") else styling.name_font }
+			size: { (if styling.transformation_reminder == "notch" then 27 else 30) - shrink_reminder() }
 			color: black
 		symbol font:
 			name: { styling.casting_cost_mana_symbols }
-			size: 30
-		alignment: center middle shrink-overflow
+			size: { (if styling.transformation_reminder == "notch" then 27 else 30) - shrink_reminder() }
+		alignment: { if styling.transformation_reminder == "notch" then "left middle" else "center middle shrink-overflow" }
 	transformation reminder pt paste:
 		left: 496
 		top: 867
@@ -2323,12 +2373,12 @@ extra card style:
 		mask: { border("identity") }
 	transformation reminder border:
 		visible: { set.border_color != rgb(0,0,0) and styling.transformation_reminder != "none" }
-		left: 0
-		top: 834
-		height: 101
-		width: { if styling.transformation_reminder == "long" then 506 else 400 }
+		left: { if styling.transformation_reminder == "notch" then 10 else 0 }
+		top: { if styling.transformation_reminder == "notch" then 845 else 834 }
+		height: { if styling.transformation_reminder == "notch" then 56 else 101 }
+		width: { if styling.transformation_reminder == "notch" then 53 else if styling.transformation_reminder == "long" then 506 else 400 }
 		z index: 23
-		mask: { border("remindersaga" + ( if has_leaf() then "leaf" else "" ) + styling.transformation_reminder) }
+		mask: { if styling.transformation_reminder == "notch" then border("remindernotchleft") else border("remindersaga" + ( if has_leaf() then "leaf" else "" ) + styling.transformation_reminder) }
 	transformation reminder pt paste border:
 		visible: { set.border_color != rgb(0,0,0) and styling.transformation_reminder == "long" and card.pt != "" }
 		left: 496
@@ -2457,5 +2507,5 @@ extra card style:
 		z index: 8
 		render style: image
 		popup style: in place
-		mask: { "/magic-genevensis-00-main.mse-style/pride_" + (if has_crown() or has_special_crown() then "legend_" else "") + "mask.png" }
 		image: { if input == "none" then "" else "/magic-genevensis-00-main.mse-style/pride/" + input + ".png" }
+		mask: /magic-genevensis-00-main.mse-style/pride_mask.png

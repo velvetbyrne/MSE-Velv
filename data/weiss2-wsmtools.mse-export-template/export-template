@@ -1,0 +1,35 @@
+mse version: 2.1.2
+short name: wsmtools
+full name: wsmtools Exporter
+position hint: 003
+icon: icon.png
+version: 2023-10-20
+installer group: ronelm2000/weiss2/Export/wsmtools
+game: weiss2
+create directory: true
+file type: Weiss Schwarz Set (*.ws-set)|*.ws-set
+
+depends on:
+	package: weiss2.mse-game
+
+# By ronelm2000
+# Based on LackeyCCG Export by Pichoro and Innuendo, based on code by Idle Muse and Seeonee
+
+option field:
+	type: boolean
+	name: export images
+	description: Export images? This is required to export to Tabletop Simulator via wsmtools
+option field:
+	type: text
+	name: zoom multiplier
+	default: 1.25
+	description: Zoom multiplier for the exported images.
+script:
+	zoom_int := to_number(options.zoom_multiplier)
+	if options.export_images == "yes" then 
+	(
+		for each card in cards do (
+			write_image_file(card, file:"{sanitize_for_filename(card.api_serial)}.jpg", width: stylesheet.card_width * zoom_int, height: stylesheet.card_height * zoom_int);
+		)
+	)
+	to_string(to_json(cards))

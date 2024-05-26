@@ -1,7 +1,7 @@
 ﻿mse version: 2.1.2
 game: magic
 short name: Gen Plane
-full name: GenevensiS Hi-Res Planechase
+full name: Hi-Res
 icon: card_sample.png
 position hint: 077
 
@@ -66,14 +66,23 @@ init script:
 	
 	shrink_type :=
 	{
-		if styling.shrink_type != "" then (to_int(styling.shrink_type) or else 0)
-		else if length(remove_tags(card.type)) > 41 then 2 else if length(remove_tags(card.type)) > 38 then 1
+		if styling.shrink_type == "-" then 0
+		else if styling.shrink_type != "" then (clamp(to_int(styling.shrink_type), minimum: -40, maximum: 24) or else 0)
+		else if length(remove_tags(card.type)) > 41 then 2
+		else if length(remove_tags(card.type)) > 38 then 1
 		else 0
 	}
 	
 	shrink_name :=
 	{
-		to_int(styling.shrink_name) or else 0
+		if styling.shrink_name == "-" then 0
+		else clamp(to_int(styling.shrink_name), minimum: -40, maximum: 31) or else 0
+	}
+	
+	shrink_reminder :=
+	{
+		if styling.shrink_transformation_reminder_text == "-" then 0
+		else clamp(to_int(styling.shrink_transformation_reminder_text), minimum: -40, maximum: 25) or else 0
 	}
 	
 	has_extended_art :=
@@ -82,7 +91,7 @@ init script:
 		or
 		(
 			chosen(styling.extended_art, choice: "if land")
-			and (contains(card.super_type, match: "Land") or contains(replace(match: "Planeswalker", replace: "", card.super_type), match: "Plane"))
+			and (lang_setting("is_land")(card.super_type) or lang_setting("is_plane")(card.super_type))
 		)
 	}
 	
@@ -92,7 +101,7 @@ init script:
 		or
 		(
 			chosen(styling.legend_crown, choice: "normal if legendary")
-			and contains(card.super_type, match: "Legendary")
+			and lang_setting("is_legendary")(card.super_type)
 		)
 	}
 	
@@ -102,7 +111,7 @@ init script:
 		or
 		(
 			chosen(styling.legend_crown, choice: "special if legendary")
-			and contains(card.super_type, match: "Legendary")
+			and lang_setting("is_legendary")(card.super_type)
 		)
 	}
 	
@@ -112,7 +121,7 @@ init script:
 		else if	chosen(styling.land_leaf, choice: "yes") then true
 		else if (
 					chosen(styling.land_leaf , choice: "if land or plane")
-					and (contains(card.super_type, match: "Land") or contains(replace(match: "Planeswalker", replace: "", card.super_type), match: "Plane"))
+					and (lang_setting("is_land")(card.super_type) or lang_setting("is_plane")(card.super_type))
 				) then true
 		else false
 	}
@@ -199,6 +208,13 @@ init script:
 		else if	colons == 1 then color := split_text(string+splits[0]+":0,0,0:0,0,0:0.07:", match:",|:")
 		symbol_variation(symbol:set.symbol, border_radius: color.12, fill_type: "linear gradient", fill_color_1: rgb(color.0, color.1, color.2), fill_color_2: rgb(color.3, color.4, color.5), border_color_1: rgb(color.6, color.7, color.8), border_color_2: rgb(color.9, color.10, color.11), center_x:0.5, center_y:0.5, end_x:1, end_y:1)
 	}
+	
+	popout_left :=		{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.0 != "" then clamp(split.0, minimum: -500,	maximum: 800) else 0 }
+	popout_top :=		{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.1 != "" then clamp(split.1, minimum: -500,	maximum: 1100) else 0 }
+	popout_width :=		{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.2 != "" then clamp(split.2, minimum: 0,		maximum: 1500) else 0 }
+	popout_height :=	{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.3 != "" then clamp(split.3, minimum: 0,		maximum: 2000) else 0 }
+	
+	split_comma := split_text@(match: " *, *")
 	
 	nameline_left_margin :=
 	{
@@ -415,6 +431,7 @@ init script:
 		"sorcery" : "symbolsorcery"
 		"artifact" : "symbolartifact"
 		"enchantment" : "symbolenchantment"
+		"lesson" : "symbollesson"
 		"custom" : "symbolcustom"
 	]
 	
@@ -442,11 +459,7 @@ init script:
 					else if contains(match: ".png", styling.watermark) then ("/magic-watermarks.mse-include/" + styling.watermark)
 					else ""
 		if styling.watermark_opacity_percentage == "" then image
-		else (	alpha_value := to_number(styling.watermark_opacity_percentage) or else 100
-				alpha_value_clamped :=	if alpha_value < 0 then 0
-										else if alpha_value <= 100 then alpha_value/100
-										else 1
-				set_alpha(image, alpha: alpha_value_clamped) )
+		else set_alpha(image, alpha: get_alpha(styling.watermark_opacity_percentage, default: 100))
 	}
 	
 	set_symbol_image :=
@@ -489,19 +502,18 @@ init script:
 	textbox_image :=
 	{
 		base_image :=	if		styling.textbox_color == rgb(255,254,255)	then	image("planetextbox", side: "both")
-						else if	styling.textbox_color == rgb(255,254,255)	then	image("planetextboxlight", side: "both")
+						else if	styling.textbox_color == rgb(255,255,254)	then	image("planetextboxlight", side: "both")
 						else														recolor_image("/magic-genevensis-70-token.mse-style/textbox_background.png", color: styling.textbox_color)
-		opacity_image(base_image, percentage: styling.textbox_opacity_percentage, default: 50)
+		set_alpha(base_image, alpha: get_alpha(styling.textbox_opacity_percentage, default: 50))
 	}
 	
-	opacity_image :=
+	get_alpha :=
 	{
-		alpha_value :=	if percentage == "" then default
-						else to_number(percentage) or else default
-		alpha_value_clamped :=	if alpha_value < 0 then 0
-								else if alpha_value <= 100 then alpha_value/100
-								else 1
-		set_alpha(input, alpha: alpha_value_clamped)
+		alpha_value :=	if input == "" then default
+						else to_number(input) or else default
+		if alpha_value < 0 then 0.0
+		else if alpha_value <= 100 then alpha_value/100.0
+		else 1.0
 	}
 	
 	vorthos_default :=
@@ -841,6 +853,14 @@ styling field:
 #	initial: no
 styling field:
 	type: text
+	name: popout art coordinates
+	description: The coordinates for the popout image field, formatted as "left,top,width,height". Used to make the illustration jump in front of the frame.
+#	localized caption:
+#		fr: Coordonée de l'image superposée
+#	localized description:
+#		fr: Rajoute un champ d'illustration supplémentaire aux coordonées spécifiées. Formatté ainsi: "gauche,droite,largeur,longueur". Permet à l'illustration de passer devant le cadre de la carte.
+styling field:
+	type: text
 	name: watermark
 	description: The name of a '.png' image inside the /magic-watermarks.mse-include/ folder. Dimensions can be anything, but native is 242x242. Alternatively, write 'setsymbol' to use the set symbol instead.
 #	localized caption:
@@ -927,6 +947,7 @@ styling field:
 	choice: acorn
 	choice: swap
 	choice: tombstone
+	choice: lesson
 	choice: multitype
 	choice: structure
 	choice: creature
@@ -950,6 +971,14 @@ styling field:
 	choice: medium
 	choice: long
 	initial: none
+styling field:
+	type: text
+	name: shrink transformation reminder text
+	description: Reduces the reminder text's font size by this many points.
+#	localized caption:
+#		fr: Rapetisser le text de rappel
+#	localized description:
+#		fr: Réduire la taille du text de rappel de N points.
 styling field:
 	type: choice
 	name: fuse
@@ -1236,7 +1265,13 @@ card style:
 		z index: 10
 		mask: { "image_" + ( if has_leaf() then "leaf_" else "" ) + "mask.png" }
 		#mask: { "image_" + ( if has_extended_art() then "extended_" else "" ) + ( if has_leaf() then "leaf_" else "" ) + "mask.png" }
-		
+	mainframe image:
+		left: { popout_left() }
+		top: { popout_top() }
+		width: { popout_width() }
+		height: { popout_height() }
+		z index: 2000
+	
 	############################# Card type
 	type:
 		left: { 271 + (if styling.center_type then type_margin() else typeline_left_margin()) }
@@ -1726,11 +1761,11 @@ extra card style:
 		z index: 26
 		font:
 			name: { if styling.name_font == "" then "Beleren Bold" else styling.name_font }
-			size: 30
+			size: { 30 - shrink_reminder() }
 			color: black
 		symbol font:
 			name: { styling.casting_cost_mana_symbols }
-			size: 30
+			size: { 30 - shrink_reminder() }
 		alignment: center middle shrink-overflow
 	alias box:
 		left: 485
@@ -1903,7 +1938,7 @@ extra card style:
 		height: 68
 		z index: 12
 		render style: image
-		image: { opacity_image("type/" + color_to_prefix() + "planetype.png", percentage: styling.typebox_opacity_percentage, default: 70) }
+		image: { set_alpha("type/" + color_to_prefix() + "planetype.png", alpha: get_alpha(styling.typebox_opacity_percentage, default: 70)) }
 		mask: type_mask.png
 	card color border:
 		visible: { set.border_color != rgb(0,0,0) }
@@ -2002,5 +2037,5 @@ extra card style:
 		z index: 8
 		render style: image
 		popup style: in place
-		mask: { "/magic-genevensis-00-main.mse-style/pride_" + (if has_crown() or has_special_crown() then "legend_" else "") + "mask.png" }
 		image: { if input == "none" then "" else "/magic-genevensis-00-main.mse-style/pride/" + input + ".png" }
+		mask: /magic-genevensis-00-main.mse-style/pride_mask.png

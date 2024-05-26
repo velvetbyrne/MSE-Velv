@@ -1,7 +1,7 @@
 ﻿mse version: 2.1.2
 game: magic
 short name: Gen Full Art
-full name: GenevensiS Hi-Res Token / Full Art / Full Text
+full name: Hi-Res
 icon: card_sample.png
 position hint: 077
 
@@ -38,7 +38,7 @@ card dpi: 300
 
 ############################################################## Extra scripts
 init script:
-	card_shape := { "token" }
+	card_shape := { "normal" }
 	
 	guild_mana := { styling.use_guild_mana_symbols }
 	
@@ -63,14 +63,23 @@ init script:
 	
 	shrink_type :=
 	{
-		if styling.shrink_type != "" then (to_int(styling.shrink_type) or else 0)
-		else if length(remove_tags(card.type)) > 41 then 2 else if length(remove_tags(card.type)) > 38 then 1
+		if styling.shrink_type == "-" then 0
+		else if styling.shrink_type != "" then (clamp(to_int(styling.shrink_type), minimum: -40, maximum: 24) or else 0)
+		else if length(remove_tags(card.type)) > 41 then 2
+		else if length(remove_tags(card.type)) > 38 then 1
 		else 0
 	}
 	
 	shrink_name :=
 	{
-		to_int(styling.shrink_name) or else 0
+		if styling.shrink_name == "-" then 0
+		else clamp(to_int(styling.shrink_name), minimum: -40, maximum: 31) or else 0
+	}
+	
+	shrink_reminder :=
+	{
+		if styling.shrink_transformation_reminder_text == "-" then 0
+		else clamp(to_int(styling.shrink_transformation_reminder_text), minimum: -40, maximum: 25) or else 0
 	}
 	
 	has_extended_art :=
@@ -79,7 +88,7 @@ init script:
 		or
 		(
 			chosen(styling.extended_art, choice: "if land")
-			and (contains(card.super_type, match: "Land") or contains(replace(match: "Planeswalker", replace: "", card.super_type), match: "Plane"))
+			and (lang_setting("is_land")(card.super_type) or lang_setting("is_plane")(card.super_type))
 		)
 	}
 	
@@ -89,7 +98,7 @@ init script:
 		or
 		(
 			chosen(styling.legend_crown, choice: "normal if legendary")
-			and ( contains(card.super_type, match: "Legendary") or contains(card.name, match: "Legendary") )
+			and (lang_setting("is_legendary")(card.super_type) or lang_setting("is_legendary")(card.name))
 		)
 	}
 	
@@ -99,7 +108,7 @@ init script:
 		or
 		(
 			chosen(styling.legend_crown, choice: "special if legendary")
-			and ( contains(card.super_type, match: "Legendary") or contains(card.name, match: "Legendary") )
+			and (lang_setting("is_legendary")(card.super_type) or lang_setting("is_legendary")(card.name))
 		)
 	}
 	
@@ -109,7 +118,7 @@ init script:
 		else if	chosen(styling.land_leaf, choice: "yes") then true
 		else if (
 					chosen(styling.land_leaf , choice: "if land")
-					and (contains(card.super_type, match: "Land") or contains(replace(match: "Planeswalker", replace: "", card.super_type), match: "Plane"))
+					and (lang_setting("is_land")(card.super_type) or lang_setting("is_plane")(card.super_type))
 				) then true
 		else false
 	}
@@ -134,12 +143,17 @@ init script:
 		styling.color_indicator_dot and length(color_to_base_prefix()) > 0
 	}
 	
-	chop_top := { clamp((to_int(pull_comma_array(styling.chop_rule_textbox, cell:0, end:0, default:0)) or else 0), minimum: -500, maximum: 500) }
+	image_left := { if has_extended_art() then 0 else 54 }
+	image_top := { if styling.type_location == "under the name" then 175 else 114 }
+	image_width := { if has_extended_art() then 750 else if styling.transformation_reminder == "notch" then (if card.pt == "" then 654 else 656) else 642 }
+	image_height :=	{ if styling.type_location == "under the name" then 797 else 858 }
+	
+	chop_top := { clamp((to_int(pull_comma_array(styling.chop_rule_textbox, cell:0, end:0, default:0)) or else 0), minimum: -600, maximum: 270) }
 	chop_bot :=
 	{
 		( clamp((to_int(pull_comma_array(styling.chop_rule_textbox, cell:1, end:0, default:0)) or else 0), minimum: -500, maximum: 500) ) +
 		( if remove_tags(card.flavor_text) == "" then 0 else (12 + card_style.flavor_text.content_lines*37) ) +
-		( if styling.transformation_reminder != "none" then 14 else 0 )
+		( if styling.transformation_reminder != "none" and styling.transformation_reminder != "notch" then 14 else 0 )
 	}
 	chop_right := { clamp((to_int(pull_comma_array(styling.chop_rule_textbox, cell:2, end:0, default:0)) or else 0), minimum: -500, maximum: 500) }
 	
@@ -178,7 +192,7 @@ init script:
 	
 	textbox_background_top := 
 	{
-		desired_top := 653 + chop_top() - (if must_cover_typeline() then 65 else 0) - (if has_wings() then 67 else 0)
+		desired_top := 653 + chop_top() - (if must_cover_typeline() then 65 else 0)
 		if desired_top < 114 then 114 else desired_top
 	}
 	
@@ -189,28 +203,35 @@ init script:
 	
 	textbox_background_image :=
 	{
-		base_image := 	if		styling.textbox_color == rgb(255,254,255)	then crop(image("tokentextbox", side: "both"), width: 750, height: 972-textbox_background_top(), offset_x: 0, offset_y: textbox_background_top())
-						else if	styling.textbox_color == rgb(255,255,254)	then crop(image("tokentextboxlight", side: "both"), width: 750, height: 972-textbox_background_top(), offset_x: 0, offset_y: textbox_background_top())
+		top := textbox_background_top()
+		base_image := 	if		styling.textbox_color == rgb(255,254,255)	then crop_safe(image("tokentextbox", side: "both"), width: 750, height: 972-top, left: 0, top: top)
+						else if	styling.textbox_color == rgb(255,255,254)	then crop_safe(image("tokentextboxlight", side: "both"), width: 750, height: 972-top, left: 0, offset_y: top)
 						else												recolor_image("textbox_background.png", color: styling.textbox_color)
-		opacity_image(base_image)
+		set_alpha(base_image, alpha: get_alpha(styling.textbox_opacity_percentage, default: 0))
 	}
 	
-	watermark_top :=
+	textbox_background_wings_image :=
 	{
-		desired_top := textbox_top() - 8
-		if desired_top < 653 then (326+to_int(desired_top/2)) else desired_top
-	}
-	
-	watermark_height :=
-	{
-		desired_top := watermark_top()
-		if desired_top <= 653 then 313 else (966 - desired_top)
+		base_image := 	if		styling.textbox_color == rgb(255,254,255)	then crop_safe(image("tokentextbox", side: "both"), width: 750, height: 67, left: 0, top: textbox_background_top()-67)
+						else if	styling.textbox_color == rgb(255,255,254)	then crop_safe(image("tokentextboxlight", side: "both"), width: 750, height: 67, left: 0, top: textbox_background_top()-67)
+						else												recolor_image("textbox_background.png", color: styling.textbox_color)
+		set_alpha(base_image, alpha: get_alpha(styling.textbox_opacity_percentage, default: 0))
 	}
 	
 	watermark_left :=
 	{
 		desired_top := watermark_top()
-		if desired_top <= 653 then 219 else 219 + to_int((313 - (966 - desired_top))/2)
+		if desired_top <= 653 then 219 else 219 + to_int((312 - (965 - desired_top))/2)
+	}
+	watermark_top :=
+	{
+		desired_top := textbox_top() - 8
+		if desired_top < 653 then (326+to_int(desired_top/2)) else desired_top
+	}
+	watermark_size :=
+	{
+		desired_top := watermark_top()
+		if desired_top <= 653 then 312 else (965 - desired_top)
 	}
 	
 	must_cover_typeline :=
@@ -218,7 +239,7 @@ init script:
 		if		styling.type_location == "under the name"																										then false
 		else if	has_rarity()	and ( styling.rarity_location == "type line right" or styling.rarity_location == "type line left" )								then true
 		else if	has_identity()	and ( styling.color_indicator_dot_location == "type line right"	or styling.color_indicator_dot_location == "type line left" )	then true
-		else if	card.type != "<word-list-type></word-list-type>"																								then true
+		else if	trim(remove_tags(card.type)) != ""																												then true
 		else																																					false
 	}
 	
@@ -247,6 +268,13 @@ init script:
 		else if	colons == 1 then color := split_text(string+splits[0]+":0,0,0:0,0,0:0.07:", match:",|:")
 		symbol_variation(symbol:set.symbol, border_radius: color.12, fill_type: "linear gradient", fill_color_1: rgb(color.0, color.1, color.2), fill_color_2: rgb(color.3, color.4, color.5), border_color_1: rgb(color.6, color.7, color.8), border_color_2: rgb(color.9, color.10, color.11), center_x:0.5, center_y:0.5, end_x:1, end_y:1)
 	}
+	
+	popout_left :=		{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.0 != "" then clamp(split.0, minimum: -500,	maximum: 800) else 0 }
+	popout_top :=		{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.1 != "" then clamp(split.1, minimum: -500,	maximum: 1100) else 0 }
+	popout_width :=		{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.2 != "" then clamp(split.2, minimum: 0,		maximum: 1500) else 0 }
+	popout_height :=	{ split := split_comma(styling.popout_art_coordinates); if length(split) > 3 and split.3 != "" then clamp(split.3, minimum: 0,		maximum: 2000) else 0 }
+	
+	split_comma := split_text@(match: " *, *")
 	
 	nameline_left_margin :=
 	{
@@ -503,6 +531,7 @@ init script:
 		"sorcery" : "symbolsorcery"
 		"artifact" : "symbolartifact"
 		"enchantment" : "symbolenchantment"
+		"lesson" : "symbollesson"
 		"custom" : "symbolcustom"
 	]
 	
@@ -514,8 +543,8 @@ init script:
 	
 	reminder_image :=
 	{
-		name := "remindertoken" + styling.transformation_reminder
-		image(name, side: "both")
+		if styling.transformation_reminder == "notch" then	image("remindernotchright" + (if card.pt == "" then "low" else "") + "transparent", side: "right")
+		else												image("remindertoken" + styling.transformation_reminder, side: "both")
 	}
 	
 	pt_image :=
@@ -530,11 +559,7 @@ init script:
 					else if contains(match: ".png", styling.watermark) then ("/magic-watermarks.mse-include/" + styling.watermark)
 					else ""
 		if styling.watermark_opacity_percentage == "" then image
-		else (	alpha_value := to_number(styling.watermark_opacity_percentage) or else 100
-				alpha_value_clamped :=	if alpha_value < 0 then 0
-										else if alpha_value <= 100 then alpha_value/100
-										else 1
-				set_alpha(image, alpha: alpha_value_clamped) )
+		else set_alpha(image, alpha: get_alpha(styling.watermark_opacity_percentage, default: 100))
 	}
 	
 	set_symbol_image :=
@@ -574,13 +599,13 @@ init script:
 		recolor_image("/magic-genevensis-00-main.mse-style/illustrator_brush_" + input + ".png", color: if styling.illustrator_text_color == rgb(255,254,255) then copyright_color() else styling.illustrator_text_color )
 	}
 	
-	opacity_image :=
+	get_alpha :=
 	{
-		alpha_value :=	to_number(styling.textbox_opacity_percentage) or else 0
-		alpha_value_clamped :=	if alpha_value < 0 then 0
-								else if alpha_value <= 100 then alpha_value/100
-								else 1
-		set_alpha(input, alpha: alpha_value_clamped)
+		alpha_value :=	if input == "" then default
+						else to_number(input) or else default
+		if alpha_value < 0 then 0.0
+		else if alpha_value <= 100 then alpha_value/100.0
+		else 1.0
 	}
 	
 	vorthos_default :=
@@ -614,13 +639,39 @@ init script:
 		if text_size > 9 then "long" else if text_size < 7 then "short" else "medium"
 	}
 	
+	current_mask :=
+	{
+		pt :=		if card.pt != ""									then	"pt_"
+					else														"nopt_"
+		type :=		if styling.type_location == "under the name"		then	"type_"
+					else														"notype_"
+		frame := 	if has_extended_art()								then	"extended"
+					else if styling.transformation_reminder != "notch"	then	"normal"
+					else if card.pt == ""								then	"notchlow"
+					else														"notchhigh"
+		"mask/" + pt + type + frame + ".png"
+	}
+	
+	crop_safe :=
+	{
+		if		left < 0
+			or	top < 0
+			or	width <= 0
+			or	height <= 0
+			or	left + width > 750
+			or	top + height > 1046
+		then ""
+		else crop(input, offset_x: left, offset_y: top, width: width, height: height)
+	}
+	
 	clamp :=
 	{
 		if input < minimum then minimum
 		else if input > maximum then maximum
 		else input
 	}
-	
+
+
 ############################################################## Set info fields
 set info style:
 	symbol:
@@ -867,8 +918,16 @@ styling field:
 	initial: no
 styling field:
 	type: text
+	name: popout art coordinates
+	description: The coordinates for the popout image field, formatted as "left,top,width,height". Used to make the illustration jump in front of the frame.
+#	localized caption:
+#		fr: Coordonée de l'image superposée
+#	localized description:
+#		fr: Rajoute un champ d'illustration supplémentaire aux coordonées spécifiées. Formatté ainsi: "gauche,droite,largeur,longueur". Permet à l'illustration de passer devant le cadre de la carte.
+styling field:
+	type: text
 	name: watermark
-	description: The name of a '.png' image inside the /magic-watermarks.mse-include/ folder. Dimensions can be anything, but native is 313x313. Alternatively, write 'setsymbol' to use the set symbol instead.
+	description: The name of a '.png' image inside the /magic-watermarks.mse-include/ folder. Dimensions can be anything, but native is 312x312. Alternatively, write 'setsymbol' to use the set symbol instead.
 #	localized caption:
 #		fr: Filigrane
 #	localized description:
@@ -945,6 +1004,7 @@ styling field:
 	choice: acorn
 	choice: swap
 	choice: tombstone
+	choice: lesson
 	choice: multitype
 	choice: structure
 	choice: creature
@@ -967,7 +1027,16 @@ styling field:
 	choice: short
 	choice: medium
 	choice: long
+	choice: notch
 	initial: none
+styling field:
+	type: text
+	name: shrink transformation reminder text
+	description: Reduces the reminder text's font size by this many points.
+#	localized caption:
+#		fr: Rapetisser le text de rappel
+#	localized description:
+#		fr: Réduire la taille du text de rappel de N points.
 styling field:
 	type: choice
 	name: fuse
@@ -1048,7 +1117,7 @@ styling field:
 	choice: name line right
 	choice: type line left
 	choice: type line right
-	initial: name line right
+	initial: type line right
 styling field:
 	type: text
 	name: alt rarity color
@@ -1282,18 +1351,18 @@ card style:
 	
 	############################# Image
 	image:
-		left: { if has_extended_art() then 0 else 54 }
-		top: { if styling.type_location == "under the name" then 175 else 114 }
-		width: { if has_extended_art() then 750 else 642 }
-		height:	{ if styling.type_location == "under the name" then 797 else 858 }
+		left: { image_left() }
+		top: { image_top() }
+		width: { image_width() }
+		height:	{ image_height() }
 		z index: 10
-		mask:
-			script:
-				"image_" +
-				( if has_extended_art() then "extended_" else "" ) +
-				( if card.pt != "" then "pt_" else "" ) +
-				( if styling.type_location == "under the name" then "type_" else "" ) +
-				"mask.png"
+		mask: { crop_safe(current_mask(), width: image_width(), height: image_height(), left: image_left(), top: image_top()) }
+	mainframe image:
+		left: { popout_left() }
+		top: { popout_top() }
+		width: { popout_width() }
+		height: { popout_height() }
+		z index: 2000
 	
 	############################# Card type
 	type:
@@ -1425,7 +1494,7 @@ card style:
 				then "middle center"
 				else "middle left"
 		z index: 44
-		padding bottom: { if card.pt != "" or styling.transformation_reminder != "none" then 30 else 22 }
+		padding bottom: { if card.pt != "" or (styling.transformation_reminder != "none" and styling.transformation_reminder != "notch") then 30 else 22 }
 		line height hard: { if contains(card.flavor_text, match: "<li>") then 0.9 else 1.2 }
 		line height line: 1.5
 		line height soft: 0.9
@@ -1606,11 +1675,11 @@ extra card field:
 	choice: textbox background
 extra card field:
 	type: choice
-	name: textbox frame
+	name: textbox background wings
 	editable: false
 	save value: false
 	show statistics: false
-	choice: textbox frame
+	choice: textbox background wings
 extra card field:
 	type: color
 	name: card color border
@@ -1690,13 +1759,6 @@ extra card field:
 	script: set.border_color
 extra card field:
 	type: color
-	name: textbox border
-	editable: false
-	save value: false
-	show statistics: false
-	script: set.border_color
-extra card field:
-	type: color
 	name: pt border
 	editable: false
 	save value: false
@@ -1751,28 +1813,28 @@ extra card style:
 		render style: image
 		image: { symbol_image() }
 	transformation reminder:
-		left: 0
-		top: { if styling.transformation_reminder == "short" then 926 else 911 }
-		height: { if styling.transformation_reminder == "short" then 91 else 103 }
-		width: { if styling.transformation_reminder == "short" then 258 else if styling.transformation_reminder == "medium" then 376 else 494 }
+		left: { if styling.transformation_reminder == "notch" then 687 else 0 }
+		top: { if styling.transformation_reminder == "notch" then (if card.pt == "" then 900 else 875) else if styling.transformation_reminder == "short" then 926 else 911 }
+		height: { if styling.transformation_reminder == "notch" then 56 else if styling.transformation_reminder == "short" then 91 else 103 }
+		width: { if styling.transformation_reminder == "notch" then 53 else if styling.transformation_reminder == "short" then 258 else if styling.transformation_reminder == "medium" then 376 else 494 }
 		z index: 32
-		visible: { styling.transformation_reminder != "none" }
+		visible: { styling.transformation_reminder != "none" and not (styling.transformation_reminder == "notch" and has_extended_art()) }
 		render style: image
 		image: { reminder_image() }
 	transformation reminder text:
-		left: { if styling.transformation_reminder == "short" then 4 else 22 }
-		top: 947
-		height: 60
-		width: { if styling.transformation_reminder == "short" then 191 else if styling.transformation_reminder == "medium" then 294 else if styling.transformation_reminder == "long" then 404 else 0 }
-		z index: 36
+		left: { if styling.transformation_reminder == "notch" then (if card.pt == "" then 618 else 620) else if styling.transformation_reminder == "short" then 4 else 22 }
+		top: { if styling.transformation_reminder == "notch" then (if card.pt == "" then 906 else 888) else 947 }
+		height: { if styling.transformation_reminder == "notch" then (if has_extended_art() then 0 else 30) else 60 }
+		width: { if styling.transformation_reminder == "notch" then 75 else if styling.transformation_reminder == "short" then 191 else if styling.transformation_reminder == "medium" then 294 else if styling.transformation_reminder == "long" then 404 else 0 }
+		z index: 46
 		font:
-			name: { if styling.name_font == "" then "Beleren Bold" else styling.name_font }
-			size: 30
-			color: black
+			name: { if styling.name_font == "" then (if styling.transformation_reminder == "notch" then "ModMatrix" else "Beleren Bold") else styling.name_font }
+			size: { (if styling.transformation_reminder == "notch" then 27 else 30) - shrink_reminder() }
+			color: { if styling.transformation_reminder == "notch" then styling.text_color else "black" }
 		symbol font:
 			name: { styling.casting_cost_mana_symbols }
-			size: 30
-		alignment: center middle shrink-overflow
+			size: { (if styling.transformation_reminder == "notch" then 27 else 30) - shrink_reminder() }
+		alignment: { if styling.transformation_reminder == "notch" then "right middle" else "center middle shrink-overflow" }
 	transformation reminder pt paste:
 		left: 447
 		top: 941
@@ -1875,11 +1937,12 @@ extra card style:
 	watermark image:
 		left: { watermark_left() }
 		top: { watermark_top() }
-		width: { watermark_height() }
-		height: { watermark_height() }
+		width: { watermark_size() }
+		height: { watermark_size() }
 		z index: 13
 		render style: image
 		image: { opacity_watermark_image() }
+		mask: { size := watermark_size(); crop_safe(current_mask(), width: size, height: size, left: watermark_left(), top: watermark_top()) }
 	crown:
 		left: 0
 		top: 0
@@ -1927,29 +1990,24 @@ extra card style:
 		render style: image
 		image: { fuse_image() }
 	textbox background:
-		left: { if has_extended_art() then 0 else 54 }
-		right: { if has_extended_art() then 750 else 696 }
+		left: 0
+		width: 750
 		top: { textbox_background_top() }
 		bottom: 972
 		z index: 12
 		render style: image
 		image: { textbox_background_image() }
-		mask: { if has_wings() then crop("textbox_background_mask.png", width: 750, height: 972-textbox_background_top(), offset_x: 0, offset_y: 0) else "" }
-	textbox frame:
-		left:	0
-		top:	0
-		width:	750
-		height:	1046
-		z index: 14
+		mask: { top := textbox_background_top(); crop_safe(current_mask(), width: 750, height: 972 - top, left: 0, top: top) }
+	textbox background wings:
+		left: 0
+		width: 750
+		bottom: { textbox_background_top() }
+		height: 67
+		z index: 12
+		visible: { has_wings() }
 		render style: image
-		image: { frame_image() }
-		mask:
-			script:
-				"textbox_" +
-				( if has_extended_art() then "extended_" else "" ) +
-				( if card.pt != "" then "pt_" else "" ) +
-				( if styling.type_location == "under the name" then "type_" else "" ) +
-				"mask.png"
+		image: { textbox_background_wings_image() }
+		mask: { combine_blend(image1: crop_safe(current_mask(), width: 750, height: 67, left: 0, top: textbox_background_top()-67), image2: "textbox_background_wings_mask.png", combine: "multiply") }
 	card color border:
 		visible: { set.border_color != rgb(0,0,0) }
 		left: 0
@@ -2020,13 +2078,13 @@ extra card style:
 		z index: 41
 		mask: { border("identity") }
 	transformation reminder border:
-		visible: { set.border_color != rgb(0,0,0) and styling.transformation_reminder != "none" }
-		left: 0
-		top: { if styling.transformation_reminder == "short" then 926 else 911 }
-		height: { if styling.transformation_reminder == "short" then 91 else 103 }
-		width: { if styling.transformation_reminder == "short" then 258 else if styling.transformation_reminder == "medium" then 376 else 494 }
+		visible: { set.border_color != rgb(0,0,0) and styling.transformation_reminder != "none" and not (styling.transformation_reminder == "notch" and has_extended_art()) }
+		left: { if styling.transformation_reminder == "notch" then 687 else 0 }
+		top: { if styling.transformation_reminder == "notch" then (if card.pt == "" then 900 else 875) else if styling.transformation_reminder == "short" then 926 else 911 }
+		height: { if styling.transformation_reminder == "notch" then 56 else if styling.transformation_reminder == "short" then 91 else 103 }
+		width: { if styling.transformation_reminder == "notch" then 53 else if styling.transformation_reminder == "short" then 258 else if styling.transformation_reminder == "medium" then 376 else 494 }
 		z index: 33
-		mask: { border("remindertoken" + styling.transformation_reminder) }
+		mask: { if styling.transformation_reminder == "notch" then border("remindernotchright" + (if card.pt == "" then "low" else "")) else border("remindertoken" + styling.transformation_reminder) }
 	transformation reminder pt paste border:
 		visible: { set.border_color != rgb(0,0,0) and styling.transformation_reminder == "long" and card.pt != "" }
 		left: 447
@@ -2035,20 +2093,6 @@ extra card style:
 		width: 94
 		z index: 39
 		mask: { border("remindertokenlongptpaste") }
-	textbox border:
-		visible: { set.border_color != rgb(0,0,0) }
-		left:	0
-		top:	0
-		width:	750
-		height:	1046
-		z index: 15
-		mask:
-			script:
-				"tokentextbox_" +
-				( if has_extended_art() then "extended_" else "" ) +
-				( if card.pt != "" then "pt_" else "" ) +
-				( if styling.type_location == "under the name" then "type_" else "" ) +
-				"border.png"
 	alias box border:
 		visible: { set.border_color != rgb(0,0,0) and card.alias != "" }
 		left: { if styling.type_location == "under the name" then 131 else 110 }
@@ -2089,5 +2133,5 @@ extra card style:
 		z index: 30
 		render style: image
 		popup style: in place
-		mask: { "/magic-genevensis-00-main.mse-style/pride_" + (if has_crown() or has_special_crown() then "legend_" else "") + "mask.png" }
 		image: { if input == "none" then "" else "/magic-genevensis-00-main.mse-style/pride/" + input + ".png" }
+		mask: /magic-genevensis-00-main.mse-style/pride_mask.png
